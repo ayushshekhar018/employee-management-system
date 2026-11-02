@@ -8,12 +8,6 @@ import java.util.Set;
 /**
  * Hibernate entity representing an employee account and its project memberships.
  */
-/**
- * Hibernate entity representing an employee account and project memberships.
- */
-/**
- * Hibernate entity representing an employee account and project memberships.
- */
 @Entity
 @Table(name="employeeinfo")
 public class Employee {
@@ -37,7 +31,6 @@ public class Employee {
     @Column(name="emp_role",nullable=true,length=20)
     private String role;
 
-    // Project owns the join table; this collection is the inverse side of the association.
     // Project owns the join table; this is the inverse side of the association.
     @ManyToMany(mappedBy = "employees")
     private Set<Project> projects = new HashSet<>();

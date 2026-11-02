@@ -118,7 +118,6 @@ public class EmployeeDAO {
 
             try {
                 // Update the managed entity so Hibernate tracks the field changes.
-                // Modify the managed entity so Hibernate tracks the changed fields.
                 Employee existing = session.find(Employee.class, employee.getId());
 
                 if (existing == null) {

@@ -9,9 +9,6 @@ import java.util.Set;
 /**
  * Hibernate entity for a project and its allocated employees.
  */
-/**
- * Hibernate entity for a project and its allocated employees.
- */
 @Entity
 @Table(name = "projectinfo")
 public class Project {

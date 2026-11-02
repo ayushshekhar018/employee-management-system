@@ -281,7 +281,6 @@ public class ProjectDAO {
                 }
 
                 // Validate independently so one invalid project does not block other eligible allocations.
-                // Validate each project independently so eligible allocations can still succeed.
                 for (Long projectId : projectIds) {
                     Project project = session.find(Project.class, projectId);
                     if (project == null) {

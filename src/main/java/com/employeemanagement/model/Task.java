@@ -7,9 +7,6 @@ import java.time.LocalDateTime;
 /**
  * Task entity linked to one project and, optionally, one employee assignee.
  */
-/**
- * Task entity linked to one project and, optionally, one employee assignee.
- */
 @Entity
 @Table(name = "project_tasks")
 public class Task {
@@ -34,7 +31,6 @@ public class Task {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Load related records on demand; task queries explicitly fetch them when needed.
     // Related records are loaded on demand; task queries fetch them explicitly when needed.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
