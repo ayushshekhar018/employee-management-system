@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Data access operations for Employee records and employee-project relationships.
+ */
 public class EmployeeDAO {
 
     public List<Employee> findall() {
@@ -62,6 +65,7 @@ public class EmployeeDAO {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             try {
+                // Persist the new entity inside an explicit transaction.
                 session.persist(employee);
                 transaction.commit();
             } catch (Exception e) {
@@ -82,6 +86,7 @@ public class EmployeeDAO {
                     return false;
                 }
 
+                // Remove the employee from the inverse project collections before deletion.
                 for (Project project : employee.getProjects()) {
                     project.getEmployees().remove(employee);
                 }
@@ -102,6 +107,7 @@ public class EmployeeDAO {
             Transaction transaction = session.beginTransaction();
 
             try {
+                // Update the managed entity so Hibernate tracks the field changes.
                 Employee existing = session.find(Employee.class, employee.getId());
 
                 if (existing == null) {
