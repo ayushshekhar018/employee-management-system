@@ -195,4 +195,46 @@ class ProjectDAOTest extends BaseDAOTest {
         assertFalse(errors.containsKey(proj1.getId()));
         assertTrue(errors.containsKey(proj2.getId()));
     }
+
+    @Test
+    void save_rejectsInvalidProjectValues() {
+        assertThrows(IllegalArgumentException.class, () ->
+                dao.save(new Project("Negative budget", "Client", LocalDate.now(), -1.0, 2, "active")));
+        assertThrows(IllegalArgumentException.class, () ->
+                dao.save(new Project("NaN budget", "Client", LocalDate.now(), Double.NaN, 2, "active")));
+        assertThrows(IllegalArgumentException.class, () ->
+                dao.save(new Project("Negative team", "Client", LocalDate.now(), 100.0, -1, "active")));
+        assertThrows(IllegalArgumentException.class, () ->
+                dao.save(new Project("Bad status", "Client", LocalDate.now(), 100.0, 2, "archived")));
+    }
+
+    @Test
+    void delete_projectWithTasksIsRejectedWithoutDeletingProjectOrTask() {
+        Project project = new Project(
+                "Project with task",
+                "Test Client",
+                LocalDate.now(),
+                1000.0,
+                2,
+                "active"
+        );
+        dao.save(project);
+
+        TaskDAO taskDao = new TaskDAO();
+        taskDao.create(
+                "Task that keeps project alive",
+                "A project cannot be deleted while tasks reference it.",
+                "medium",
+                "todo",
+                LocalDate.now().plusDays(1),
+                project.getId(),
+                null
+        );
+
+        assertThrows(IllegalStateException.class, () -> dao.delete(project.getId()));
+        assertNotNull(dao.findById(project.getId()));
+        assertTrue(taskDao.findAll().stream()
+                .anyMatch(task -> "Task that keeps project alive".equals(task.getTitle())));
+    }
+
 }
