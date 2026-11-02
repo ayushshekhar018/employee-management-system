@@ -62,6 +62,7 @@ public class ThymeleafConfig implements ServletContextListener {
     ) throws IOException {
 
         // Create a request-scoped Thymeleaf context and expose controller-supplied model data.
+        // Build a request-scoped rendering context and expose controller-supplied model data.
         IWebExchange exchange = application.buildExchange(req, res);
 
         WebContext webContext = new WebContext(exchange);
