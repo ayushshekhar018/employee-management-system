@@ -662,6 +662,41 @@ table tbody td.empty-cell {
     margin: 0.25rem 0 0;
 }
 
+/* ---------- Login Password Visibility ---------- */
+.login-password-field {
+    position: relative;
+}
+
+.login-password-field input {
+    padding-right: 4.75rem;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 5px;
+    padding: 0.3rem 0.4rem;
+    background: transparent;
+    color: #4361ee;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: #3a0ca3;
+    text-decoration: underline;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid #4361ee;
+    outline-offset: 2px;
+}
+
 /* ---------- Login Page ---------- */
 .login-wrapper {
     min-height: 100vh;
