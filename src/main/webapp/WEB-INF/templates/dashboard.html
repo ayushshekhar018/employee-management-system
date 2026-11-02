@@ -47,9 +47,9 @@
     </div>
 
     <!-- Auth Error -->
-    <div th:if="${session.authError != null}" class="alert alert-error">
+    <div th:if="${authError != null}" class="alert alert-error">
         <span class="alert-icon">⚠️</span>
-        <span th:text="${session.authError}"></span>
+        <span th:text="${authError}"></span>
     </div>
 
     <!-- Navigation Cards -->
