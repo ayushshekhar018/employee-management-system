@@ -14,7 +14,7 @@ public class HibernateUtil {
 
     private static SessionFactory sessionFactory;
 
-    public static SessionFactory getSessionFactory() {
+    public static synchronized SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             // Build the expensive SessionFactory only when it is first requested.
             Configuration configuration = new Configuration().configure();
@@ -71,7 +71,7 @@ public class HibernateUtil {
     }
 
     /** Closes the shared factory during application shutdown. */
-    public static void shutdown() {
+    public static synchronized void shutdown() {
         if (sessionFactory == null) return;
         sessionFactory.close();
         sessionFactory = null;
