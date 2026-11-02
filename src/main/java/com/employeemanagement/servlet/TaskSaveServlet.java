@@ -43,7 +43,7 @@ public class TaskSaveServlet extends HttpServlet {
             projectId = Long.parseLong(projectParam);
             if (assigneeParam != null && !assigneeParam.isBlank()) assigneeId = Long.parseLong(assigneeParam);
             if (dueParam != null && !dueParam.isBlank()) dueDate = LocalDate.parse(dueParam);
-            taskDao.create(title, req.getParameter("description"), priority, dueDate, projectId, assigneeId);
+            taskDao.create(title, req.getParameter("description"), priority, status, dueDate, projectId, assigneeId);
             HttpSession session = req.getSession(); session.setAttribute("taskMessage", "Task created successfully.");
             res.sendRedirect(req.getContextPath() + "/tasks"); return;
         } catch (NumberFormatException | DateTimeParseException e) { error = "Enter valid project, assignee, and due date values."; }
