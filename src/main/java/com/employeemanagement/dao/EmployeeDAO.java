@@ -4,6 +4,7 @@ package com.employeemanagement.dao;
 import com.employeemanagement.util.HibernateUtil;
 import com.employeemanagement.model.Employee;
 import com.employeemanagement.model.Project;
+import com.employeemanagement.model.Task;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -86,9 +87,16 @@ public class EmployeeDAO {
                     return false;
                 }
 
-                // Remove the employee from the inverse project collections before deletion.
-                // Remove the employee from project collections before deleting the employee row.
-                // Remove the employee from project collections before deleting its record.
+                // Clear optional task assignments before employee deletion to satisfy the FK.
+                List<Task> assignedTasks = session.createQuery(
+                        "from Task t where t.assignee.id = :employeeId",
+                        Task.class
+                ).setParameter("employeeId", id).getResultList();
+                for (Task task : assignedTasks) {
+                    task.setAssignee(null);
+                }
+
+                // Remove project join-table rows before deleting the employee record.
                 for (Project project : employee.getProjects()) {
                     project.getEmployees().remove(employee);
                 }
