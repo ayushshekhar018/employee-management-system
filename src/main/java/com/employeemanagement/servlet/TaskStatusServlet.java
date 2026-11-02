@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/** Validates task status changes and delegates ownership checks to the DAO. */
 @WebServlet("/tasks/status")
 public class TaskStatusServlet extends HttpServlet {
     private final TaskDAO taskDao = new TaskDAO();
@@ -24,6 +25,7 @@ public class TaskStatusServlet extends HttpServlet {
             String status = req.getParameter("status");
             boolean admin = "admin".equalsIgnoreCase(String.valueOf(session.getAttribute("userRole")));
             long userId = ((Number) session.getAttribute("userId")).longValue();
+            // Reject unsupported status values before applying the role-aware DAO update.
             boolean updated = STATUSES.contains(status) && taskDao.updateStatus(taskId, status, userId, admin);
             session.setAttribute("taskMessage", updated ? "Task status updated." : "Task could not be updated.");
         } catch (RuntimeException e) { session.setAttribute("taskMessage", "Task could not be updated. Check the task and status values."); }
