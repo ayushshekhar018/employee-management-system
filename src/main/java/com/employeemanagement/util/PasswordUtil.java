@@ -2,8 +2,12 @@ package com.employeemanagement.util;
 
 import org.mindrot.jbcrypt.BCrypt;
 
+/**
+ * Centralizes password hashing, verification, and hash-strength checks using BCrypt.
+ */
 public class PasswordUtil {
 
+    // BCrypt work factor: increasing it raises the computational cost of hashing.
     private static final int LOG_ROUNDS = 12;
     private static final int MIN_PASSWORD_LENGTH = 6;
 
