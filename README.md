@@ -151,7 +151,7 @@ Update the username and password to match your local MySQL setup before starting
 <property name="hibernate.connection.password">YOUR_MYSQL_PASSWORD</property>
 ```
 
-The configuration currently contains literal values; setting environment variables in a hosting dashboard alone will **not** override them. Before a public production deployment, change the configuration/bootstrap code to read credentials from environment variables or a secret manager. Use a dedicated MySQL application user with limited privileges rather than the database root account.
+The default local configuration contains development values. For deployment, `HibernateUtil` can override the connection properties when `DB_HOST` is set. It then requires `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD`, and accepts `DB_PORT` (default `4000`) and `DB_SSL_MODE` (default `VERIFY_IDENTITY`). Keep real credentials in the hosting platform's secret settings, never in Git. Use a dedicated database user with limited privileges.
 
 The current `hibernate.hbm2ddl.auto=update` setting is convenient for local development, but it is not a substitute for managed schema migrations and backups. Review it before production use. SQL output is also enabled in the current configuration and should be disabled or appropriately controlled in production.
 
@@ -213,6 +213,67 @@ A suitable production topology is:
 
 Netlify may be used for a future, separately built static frontend, but it will not host this WAR backend by itself.
 
+## Deploy a free demo with Render and TiDB Cloud
+
+The repository includes a Dockerfile and a Render Blueprint for a small public demo deployment. This setup uses:
+
+- **Render Free Web Service** to run the WAR on Tomcat 11.
+- **TiDB Cloud Starter (MySQL-compatible)** for persistent relational data.
+
+The database is external because Render's free managed relational database is PostgreSQL, while this project is configured for MySQL. TiDB Cloud Starter speaks the MySQL protocol and provides a free monthly allowance. Its current documented MySQL-compatible quota is 5 GiB row storage, 5 GiB columnar storage, and 50 million Request Units per eligible instance each month. When a free instance reaches its quota, new connections can be refused until the quota resets. Review the provider's current limits before creating the database. See [TiDB Cloud Starter pricing](https://www.pingcap.com/pricing/) and [quota documentation](https://docs.pingcap.com/tidbcloud/select-cluster-tier/).
+
+### 1. Create the TiDB database
+
+1. Sign up at [TiDB Cloud](https://tidbcloud.com/) and create a **Starter** cluster in AWS Singapore (`ap-southeast-1`) if available.
+2. Select the **MySQL-compatible** connection mode.
+3. Create a database named `employeedb` using the SQL editor:
+   ```sql
+   CREATE DATABASE employeedb;
+   ```
+4. Open the connection details and note the host, port, username, and password. TiDB Cloud's MySQL endpoint normally uses port `4000`.
+5. Keep the cluster's TLS connection requirements enabled. Do not commit its password or connection string to GitHub.
+
+### 2. Deploy the Render Blueprint
+
+1. Sign in to [Render](https://render.com/) and connect your GitHub account.
+2. Open **Blueprints** and choose **New Blueprint Instance**.
+3. Select this repository and choose the `deploy/render-tidb` branch.
+4. Render reads `render.yaml` and configures a Docker-based web service in Singapore on the Free plan.
+5. Enter the TiDB values when Render asks for the three secret values:
+   - `DB_HOST`: TiDB endpoint hostname only (no `jdbc:mysql://` prefix).
+   - `DB_USERNAME`: TiDB username.
+   - `DB_PASSWORD`: TiDB password.
+6. Review the plan and deploy.
+
+If you prefer to create the service manually, choose **New → Web Service**, connect the same repository and branch, select the **Docker** runtime, use the root `Dockerfile`, choose the **Free** plan, and set the same environment variables.
+
+### 3. Verify the service settings
+
+The service uses these environment variables:
+
+| Variable | Value |
+|---|---|
+| `DB_HOST` | TiDB cluster hostname |
+| `DB_PORT` | `4000` |
+| `DB_NAME` | `employeedb` |
+| `DB_USERNAME` | TiDB username |
+| `DB_PASSWORD` | TiDB password (secret) |
+| `DB_SSL_MODE` | `VERIFY_IDENTITY` |
+
+The Render configuration listens on the `PORT` environment variable and checks `/login` for service health. The WAR is deployed as `ROOT.war`, so open the generated Render URL directly (do not append `/employee-management-system`).
+
+On first successful startup, Hibernate's existing `hbm2ddl.auto=update` setting creates or updates the mapped tables in the `employeedb` database. Check the deployment logs for database connectivity and schema errors, then test login, employee, project, allocation, and task workflows.
+
+### Free-tier limitations
+
+- Render Free web services spin down after 15 minutes without inbound traffic; the first request after idle can take around a minute to wake the service.
+- Render free services have 750 instance-hours per workspace per month, shared across free web services.
+- Render's free filesystem is ephemeral. Store application data in the external TiDB database, not in files on the Render instance.
+- TiDB Cloud Starter is free within its usage quota. It is not unlimited, and quota exhaustion can temporarily prevent new connections.
+- This combination is intended for a portfolio/demo project, not production workloads.
+
+For details, see [Render's free instance limitations](https://render.com/docs/free), [Render Docker web services](https://render.com/docs/web-services), and [TiDB Cloud Starter](https://docs.pingcap.com/tidbcloud/select-cluster-tier/).
+
 ## Security and production checklist
 
 Before exposing the application publicly:
@@ -231,7 +292,7 @@ Before exposing the application publicly:
 
 ## Current project status
 
-The repository contains the application source, Maven build configuration, Thymeleaf templates, Hibernate configuration, and automated tests. A production hosting target and production database configuration are not included. Local setup requires a configured MySQL instance and a compatible Servlet container.
+The repository contains the application source, Maven build configuration, Thymeleaf templates, Hibernate configuration, and automated tests. A separate `deploy/render-tidb` branch contains a Render/TiDB deployment configuration for a free-tier demo. The default `master` branch remains the local-development baseline; use the deployment branch when following the Render instructions above.
 
 ## Author
 
