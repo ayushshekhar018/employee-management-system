@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/** Displays the task board with role-aware visibility and optional status filtering. */
 @WebServlet("/tasks")
 public class TasksServlet extends HttpServlet {
     private final TaskDAO taskDao = new TaskDAO();
@@ -23,6 +24,7 @@ public class TasksServlet extends HttpServlet {
         }
         boolean admin = "admin".equalsIgnoreCase(String.valueOf(session.getAttribute("userRole")));
         long userId = ((Number) session.getAttribute("userId")).longValue();
+        // Administrators see all tasks; employees see only tasks assigned to their account.
         List<Task> tasks = admin ? taskDao.findAll() : taskDao.findForEmployee(userId);
         String statusFilter = req.getParameter("status");
         if (statusFilter != null && !statusFilter.isBlank() && !"all".equals(statusFilter)) {
