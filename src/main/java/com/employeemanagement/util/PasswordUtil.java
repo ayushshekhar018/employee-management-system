@@ -6,13 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
- * Centralizes password hashing and verification.
+ * Centralizes password normalization, hashing, and verification.
  * Normal accounts use BCrypt. The single public demo account uses a plain-text
  * password by explicit project configuration and must never be used for real data.
  */
 public class PasswordUtil {
 
-    // BCrypt work factor: increasing it raises the computational cost of hashing.
     private static final int LOG_ROUNDS = 12;
     private static final int MIN_PASSWORD_LENGTH = 6;
 
@@ -21,25 +20,82 @@ public class PasswordUtil {
     private static final String DEMO_ROLE = "employee";
 
     /**
-     * Hash a plain-text password using BCrypt with production-grade log rounds.
+     * Removes whitespace from the beginning/end of a password and rejects whitespace
+     * anywhere inside it. Unicode whitespace, non-breaking spaces and zero-width
+     * space characters are treated as whitespace.
+     */
+    public static String normalizePassword(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("Password must not be null.");
+        }
+
+        int start = 0;
+        int end = password.length();
+
+        while (start < end) {
+            int codePoint = password.codePointAt(start);
+            if (!isWhitespace(codePoint)) {
+                break;
+            }
+            start += Character.charCount(codePoint);
+        }
+
+        while (end > start) {
+            int codePoint = password.codePointBefore(end);
+            if (!isWhitespace(codePoint)) {
+                break;
+            }
+            end -= Character.charCount(codePoint);
+        }
+
+        String normalized = password.substring(start, end);
+
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("Password must not be empty.");
+        }
+
+        if (normalized.codePoints().anyMatch(PasswordUtil::isWhitespace)) {
+            throw new IllegalArgumentException(
+                    "Password cannot contain spaces or whitespace characters."
+            );
+        }
+
+        if (normalized.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Password must be at least " + MIN_PASSWORD_LENGTH + " characters."
+            );
+        }
+
+        return normalized;
+    }
+
+    private static boolean isWhitespace(int codePoint) {
+        return Character.isWhitespace(codePoint)
+                || Character.isSpaceChar(codePoint)
+                || codePoint == 0x200B  // zero-width space
+                || codePoint == 0xFEFF; // zero-width no-break space / BOM
+    }
+
+    /**
+     * Hash a normalized password using BCrypt with 12 log rounds.
      */
     public static String hash(String plainPassword) {
-        validatePassword(plainPassword);
+        String normalized = normalizePassword(plainPassword);
         String salt = BCrypt.gensalt(LOG_ROUNDS);
-        return BCrypt.hashpw(plainPassword, salt);
+        return BCrypt.hashpw(normalized, salt);
     }
 
     /**
      * Store the demo account password as plain text; hash every other account with BCrypt.
-     * The demo exception is limited to its exact public email and employee role.
+     * Only the exact published demo email and employee role receive this exception.
      */
     public static String hashForAccount(String email, String role, String plainPassword) {
-        validatePassword(plainPassword);
-        return isDemoAccount(email, role) ? plainPassword : hash(plainPassword);
+        String normalized = normalizePassword(plainPassword);
+        return isDemoAccount(email, role) ? normalized : hash(normalized);
     }
 
     /**
-     * Verify the public demo password by direct comparison. All other accounts
+     * Verify a demo password by constant-time comparison. All other accounts
      * continue to require a valid BCrypt hash.
      */
     public static boolean verifyForAccount(
@@ -48,23 +104,28 @@ public class PasswordUtil {
             String plainPassword,
             String storedPassword
     ) {
-        if (plainPassword == null || storedPassword == null) {
+        if (storedPassword == null) {
+            return false;
+        }
+
+        final String normalized;
+        try {
+            normalized = normalizePassword(plainPassword);
+        } catch (IllegalArgumentException exception) {
             return false;
         }
 
         if (isDemoAccount(email, role)) {
             return MessageDigest.isEqual(
-                    plainPassword.getBytes(StandardCharsets.UTF_8),
+                    normalized.getBytes(StandardCharsets.UTF_8),
                     storedPassword.getBytes(StandardCharsets.UTF_8)
             );
         }
 
-        return verify(plainPassword, storedPassword);
+        return verify(normalized, storedPassword);
     }
 
-    /**
-     * The demo account is intentionally excluded from BCrypt hash upgrades.
-     */
+    /** The demo account is intentionally excluded from BCrypt hash upgrades. */
     public static boolean needsRehashForAccount(String email, String role, String storedPassword) {
         return !isDemoAccount(email, role) && needsRehash(storedPassword);
     }
@@ -76,41 +137,29 @@ public class PasswordUtil {
                 && DEMO_ROLE.equalsIgnoreCase(role.trim());
     }
 
-    private static void validatePassword(String plainPassword) {
-        if (plainPassword == null || plainPassword.isEmpty()) {
-            throw new IllegalArgumentException("Password must not be null or empty");
-        }
-        if (plainPassword.length() < MIN_PASSWORD_LENGTH) {
-            throw new IllegalArgumentException(
-                    "Password must be at least " + MIN_PASSWORD_LENGTH + " characters"
-            );
-        }
-    }
-
-    /**
-     * Verify a plain-text password against a BCrypt hash.
-     */
+    /** Verify a normalized password against a BCrypt hash. */
     public static boolean verify(String plainPassword, String hashedPassword) {
-        if (plainPassword == null || plainPassword.isEmpty()) {
+        if (hashedPassword == null
+                || (!hashedPassword.startsWith("$2a$") && !hashedPassword.startsWith("$2b$"))) {
             return false;
         }
-        if (hashedPassword == null || hashedPassword.isEmpty()) {
-            return false;
-        }
-        if (!hashedPassword.startsWith("$2a$") && !hashedPassword.startsWith("$2b$")) {
-            return false;
-        }
+
+        final String normalized;
         try {
-            return BCrypt.checkpw(plainPassword, hashedPassword);
-        } catch (IllegalArgumentException e) {
+            normalized = normalizePassword(plainPassword);
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+
+        try {
+            return BCrypt.checkpw(normalized, hashedPassword);
+        } catch (IllegalArgumentException exception) {
             // Invalid hash format — treat as non-matching rather than throwing.
             return false;
         }
     }
 
-    /**
-     * Check whether a stored BCrypt password needs to be rehashed.
-     */
+    /** Check whether a stored BCrypt password needs to be rehashed. */
     public static boolean needsRehash(String hashedPassword) {
         if (hashedPassword == null || hashedPassword.isEmpty()) {
             return false;
