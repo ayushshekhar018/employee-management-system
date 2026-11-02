@@ -13,10 +13,6 @@
         <h1 th:text="${statusCode} + ' - Error'">Error</h1>
         <p class="error-message" th:text="${errorMessage}">An error occurred.</p>
         <p class="text-muted" th:if="${requestUri != null && !requestUri.isEmpty()}" th:text="'Requested: ' + ${requestUri}"></p>
-        <div th:if="${exceptionType != null}" class="alert alert-error text-left mt-2">
-            <span class="alert-icon">⚠️</span>
-            <span th:text="'Exception: ' + ${exceptionType}"></span>
-        </div>
         <div class="error-actions">
             <a th:href="@{/dashboard}" class="btn btn-primary">🏠 Go to Dashboard</a>
             <a th:href="@{/login}" class="btn btn-outline">🔑 Login</a>
