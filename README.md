@@ -1,48 +1,70 @@
-# Employee Management System
+# Employee & Project Management System
 
-A web-based Employee Management System built with Java, Jakarta Servlets, Hibernate ORM, Thymeleaf, and MySQL. The application provides a central interface for managing employees, projects, tasks, and project allocations.
+A server-rendered Java web application for managing employee records, projects, task assignments, and employee-to-project allocations. It includes role-aware access control, BCrypt password hashing, Hibernate-based persistence, and Thymeleaf views.
 
-> **Deployment note:** This is a Java Servlet application packaged as a WAR file. Netlify is designed primarily for static sites and serverless functions; it does not run a traditional Java Servlet container such as Apache Tomcat. Deploy the Java application to a Java-compatible host (for example, a VPS or a platform that supports Docker/Tomcat). Netlify can optionally host a separate static frontend, but it cannot host this WAR application by itself.
+**Repository:** [ayushshekhar018/employee-management-system](https://github.com/ayushshekhar018/employee-management-system)
+
+> **Deployment:** This application is packaged as a Java WAR and requires a Jakarta Servlet-compatible application server. It cannot run as a backend on Netlify's static hosting. Use Apache Tomcat (11.x) or another host that explicitly supports the required Java runtime and WAR deployment.
 
 ## Features
 
-- **Authentication:** Login and logout flow with servlet-based authentication filtering.
-- **Employee management:** Create, view, update, and delete employee records.
-- **Project management:** Create and manage projects and view project details.
-- **Task management:** Create tasks, assign them to projects, update task status, and delete tasks.
-- **Employee/project allocation:** Allocate employees to projects, including multi-employee allocation and review/confirmation flows.
-- **Employee and project views:** View an employee's projects and the employees assigned to a project.
-- **Server-rendered pages:** Thymeleaf templates are rendered on the server.
-- **Persistence:** Hibernate ORM manages application entities stored in MySQL.
-- **Password utilities:** BCrypt-based password hashing utility is included.
+### Authentication and access
+- Login and logout using server-side HTTP sessions.
+- BCrypt password hashing and verification.
+- Automatic rehashing of older BCrypt hashes after successful authentication when the configured work factor is outdated.
+- Route-level authentication checks and administrator-only route checks.
 
-## Technology Stack
+### Employee management
+- Create, view, update, and delete employee records.
+- Store employee details such as department, designation, email, salary, and role.
+- View an employee's assigned projects.
 
-| Layer | Technology |
+### Project management
+- Create, view, update, and delete projects.
+- Track client, start date, budget, status, and maximum team size.
+- View the employees currently allocated to each project.
+
+### Allocation management
+- Allocate an employee to an individual project.
+- Review a multi-project allocation before confirming it.
+- Validate project status, team capacity, and duplicate allocations.
+- Display per-project success and failure results for batch allocation.
+
+### Task management
+- Create tasks under a project and optionally assign them to an employee.
+- Set priority, status, and due date.
+- Show an administrator-wide task board or an employee-specific task list.
+- Restrict employee task-status changes to tasks assigned to that employee.
+
+## Technology stack
+
+| Area | Technology |
 |---|---|
 | Language | Java 17 |
-| Build | Apache Maven |
+| Build and dependency management | Apache Maven |
 | Packaging | WAR |
 | Web layer | Jakarta Servlet API 6.1 |
-| Application server | Apache Tomcat 11.x |
-| ORM | Hibernate ORM 7 |
+| Application server | Apache Tomcat 11.x (compatible Servlet 6.1 container) |
+| ORM / persistence | Hibernate ORM 7 |
 | Database | MySQL |
-| Template engine | Thymeleaf 3 |
+| Server-side templates | Thymeleaf 3.1 |
 | Password hashing | jBCrypt |
-| Testing | JUnit 6 and H2 (test scope) |
+| Tests | JUnit Jupiter 6 and H2 (test scope) |
+
+Dependency versions are defined in [pom.xml](pom.xml). The Servlet API is declared with Maven's `provided` scope because the servlet container supplies it at runtime.
 
 ## Architecture
 
-The project follows a layered structure:
+The codebase follows a layered, servlet-based MVC approach:
 
-- **Servlets** handle HTTP requests, application flow, and form submissions.
-- **DAO classes** encapsulate database operations.
-- **Model classes** represent Employee, Project, and Task entities.
-- **Hibernate** maps entities to relational database tables.
-- **Thymeleaf templates** render dynamic HTML pages on the server.
-- **Filters** provide request authentication checks and request logging.
+1. **Servlets** receive HTTP requests, validate request parameters, coordinate application workflows, and select views.
+2. **DAO classes** encapsulate Hibernate queries and transactional data operations.
+3. **Model classes** define the `Employee`, `Project`, and `Task` persistence entities and their relationships.
+4. **Filters** apply request logging and session/role-based route checks.
+5. **Thymeleaf configuration and templates** render server-side HTML responses.
+6. **Hibernate** maps entities to MySQL tables and manages persistence through a shared `SessionFactory`.
 
-## Project Structure
+### Main source layout
 
 ```text
 employee-management-system/
@@ -50,10 +72,10 @@ employee-management-system/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/employeemanagement/
-│   │   │   ├── config/       # Thymeleaf configuration
-│   │   │   ├── dao/          # Employee, Project, Task and User DAOs
+│   │   │   ├── config/       # Thymeleaf lifecycle and rendering configuration
+│   │   │   ├── dao/          # Employee, project, task, and user data access
 │   │   │   ├── filter/       # Authentication and request logging filters
-│   │   │   ├── model/        # Employee, Project and Task entities
+│   │   │   ├── model/        # Hibernate entities
 │   │   │   ├── servlet/      # HTTP request handlers
 │   │   │   └── util/         # Hibernate and password utilities
 │   │   ├── resources/
@@ -65,24 +87,22 @@ employee-management-system/
 │   │       ├── css/
 │   │       └── index.jsp
 │   └── test/
-│       ├── java/              # DAO, model and utility tests
+│       ├── java/              # DAO, model, and utility tests
 │       └── resources/         # Test Hibernate configuration
 └── README.md
 ```
 
 ## Prerequisites
 
-Install the following before running the project locally:
+Install the following:
 
 - JDK 17
-- Apache Maven 3.8+
-- MySQL Server 8.0+
-- Apache Tomcat 11.x
-- IntelliJ IDEA (recommended, but any Java IDE can be used)
+- Apache Maven 3.8 or later
+- MySQL Server 8.0 or later
+- Apache Tomcat 11.x (or a compatible Servlet 6.1 container)
+- IntelliJ IDEA or another Java IDE (optional)
 
-Tomcat 11 is required because the project uses Jakarta Servlet API 6.1. Tomcat 11 requires Java 17 or later.
-
-Check your installations:
+Verify the tools from a terminal:
 
 ```bash
 java -version
@@ -90,7 +110,9 @@ mvn -version
 mysql --version
 ```
 
-## Local Setup
+Tomcat 11 is the recommended container because the project uses Jakarta Servlet API 6.1. Do not deploy this WAR to a Tomcat version that only supports the older `javax.servlet` namespace.
+
+## Run locally
 
 ### 1. Clone the repository
 
@@ -99,55 +121,57 @@ git clone https://github.com/ayushshekhar018/employee-management-system.git
 cd employee-management-system
 ```
 
-### 2. Create the MySQL database
+### 2. Create a MySQL database
 
-Log in to MySQL and create the database:
+Connect to your local MySQL server and create the application database:
 
 ```sql
 CREATE DATABASE employeedb;
 ```
 
-The current Hibernate configuration points to a local MySQL database named `employeedb`.
-
-### 3. Configure database credentials
+### 3. Configure Hibernate
 
 Open:
 
 `src/main/resources/hibernate.cfg.xml`
 
-Update the connection properties to match your MySQL installation:
+The checked-in development configuration currently targets:
+
+- Host: `localhost`
+- Port: `3306`
+- Database: `employeedb`
+- Username: `root`
+- Password: empty
+
+Update the username and password to match your local MySQL setup before starting the app. For example:
 
 ```xml
-<property name="hibernate.connection.url">
-    jdbc:mysql://localhost:3306/employeedb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC
-</property>
+<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/employeedb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</property>
 <property name="hibernate.connection.username">YOUR_MYSQL_USERNAME</property>
 <property name="hibernate.connection.password">YOUR_MYSQL_PASSWORD</property>
 ```
 
-**Important:** The checked-in configuration currently has an empty password and uses the MySQL `root` user. Set credentials appropriate for your local environment. Do not commit real production credentials to GitHub. The current configuration uses literal values from this XML file; merely adding environment variables in a hosting dashboard will not override them. Before production deployment, update the Hibernate configuration/bootstrap code to read the database URL, username, and password from environment variables or a secrets manager, and use a dedicated database user with limited privileges.
+The configuration currently contains literal values; setting environment variables in a hosting dashboard alone will **not** override them. Before a public production deployment, change the configuration/bootstrap code to read credentials from environment variables or a secret manager. Use a dedicated MySQL application user with limited privileges rather than the database root account.
 
-The current setting `hibernate.hbm2ddl.auto=update` is intended for development. Review the schema-management strategy before production deployment; do not assume it is a substitute for database migrations or backups.
+The current `hibernate.hbm2ddl.auto=update` setting is convenient for local development, but it is not a substitute for managed schema migrations and backups. Review it before production use. SQL output is also enabled in the current configuration and should be disabled or appropriately controlled in production.
 
-### 4. Build the WAR
+### 4. Build the application
 
-From the project root, run:
+Run from the project root:
 
 ```bash
 mvn clean package
 ```
 
-The deployable WAR should be generated at:
+The WAR is generated at:
 
 ```text
 target/employee-management-system.war
 ```
 
-### 5. Deploy locally to Tomcat
+### 5. Deploy to Tomcat
 
-Copy the generated WAR into Tomcat's `webapps` directory and start Tomcat.
-
-For example:
+Copy the WAR into the Tomcat `webapps` directory and start the server:
 
 ```bash
 cp target/employee-management-system.war "$CATALINA_HOME/webapps/"
@@ -156,62 +180,62 @@ cp target/employee-management-system.war "$CATALINA_HOME/webapps/"
 
 On Windows, use the corresponding `.bat` scripts in Tomcat's `bin` directory.
 
-Open:
+Open the application at:
 
 ```text
 http://localhost:8080/employee-management-system/
 ```
 
-The context path is based on the WAR file name. If you rename the WAR, the URL context path will change accordingly.
+The context path is derived from the WAR filename. If the WAR is renamed, the context path changes accordingly.
 
-## Running Tests
+## Run tests
 
-Run the automated test suite with:
+Execute the test suite with:
 
 ```bash
 mvn test
 ```
 
-The project includes JUnit tests and an H2 test dependency. Tests should use the test configuration under `src/test/resources`, rather than connecting to a production database.
+The project includes JUnit Jupiter tests and an H2 test dependency. Check that the test configuration in `src/test/resources/hibernate.cfg.xml` is used for test execution; tests should not require a production database.
 
-## Deployment
+## Deployment notes
 
-### Can this project be deployed directly to Netlify?
+### Netlify compatibility
 
-**No.** Netlify does not provide a traditional Java Servlet container for running a WAR file. Publishing this repository to Netlify as a static site will not start the servlets, Hibernate, or Thymeleaf rendering.
+This repository is a Java Servlet application, not a static frontend. Netlify static hosting does not run a conventional Tomcat server or deploy a Java WAR. Deploy the backend to a Java-capable service that explicitly supports Java 17 and Tomcat 11/WAR deployment.
 
-### Recommended deployment architecture
+A suitable production topology is:
 
-1. Deploy the **Java WAR** to a host that supports Java 17 and Apache Tomcat 11.
-2. Provision a **managed MySQL database** (or another reachable MySQL server).
-3. Configure the Java application's database URL, username, and password using environment variables or the hosting provider's secret configuration.
-4. Allow the application host to connect to the database securely. Do not use `localhost` for a remote database.
-5. Use Netlify only if you later separate a static frontend from the Java backend; configure that frontend to call the deployed backend API.
+1. Java WAR hosted in a Servlet 6.1-compatible runtime.
+2. MySQL hosted on a managed or otherwise secured database service.
+3. Database credentials supplied through the deployment platform's secret configuration after the application is updated to read them securely.
+4. HTTPS enabled at the application host or trusted reverse proxy.
 
-Before choosing a hosting provider, verify its Java version, Tomcat 11/WAR deployment support, persistent storage requirements, and database connectivity.
+Netlify may be used for a future, separately built static frontend, but it will not host this WAR backend by itself.
 
-## Security and Production Checklist
+## Security and production checklist
 
-- [ ] Replace the empty/local database password with a secure secret.
-- [ ] Do not expose database credentials in source control.
-- [ ] Use a dedicated MySQL database user instead of the root account.
+Before exposing the application publicly:
+
+- [ ] Replace the local database credentials and empty password configuration.
+- [ ] Move database credentials out of source code and into environment-backed configuration or a secrets manager.
+- [ ] Use a dedicated database user with minimum required privileges.
 - [ ] Restrict database network access to the application host.
-- [ ] Use HTTPS for public deployments.
-- [ ] Review authentication, session, and authorization behaviour before exposing the app publicly.
-- [ ] Review Hibernate schema generation settings and establish a backup/migration strategy.
-- [ ] Disable verbose SQL logging in production.
-- [ ] Test all employee, project, task, and allocation flows against the production-like environment.
+- [ ] Enforce HTTPS.
+- [ ] Review authentication, session handling, and authorization rules.
+- [ ] Add CSRF protection for state-changing form submissions.
+- [ ] Review validation and error handling for all user-submitted fields.
+- [ ] Replace development schema auto-update with a controlled migration strategy.
+- [ ] Disable or appropriately configure SQL logging.
+- [ ] Back up the database and test restore procedures.
 
-## Current Status
+## Current project status
 
-This repository contains the Java web application source, Maven build configuration, Thymeleaf templates, Hibernate configuration, and tests. A public production deployment is not configured by this README; a Java-compatible application host and a reachable MySQL database are required.
+The repository contains the application source, Maven build configuration, Thymeleaf templates, Hibernate configuration, and automated tests. A production hosting target and production database configuration are not included. Local setup requires a configured MySQL instance and a compatible Servlet container.
 
 ## Author
 
-**Ayush Shekhar**
+**Ayush Shekhar**  
+[GitHub: @ayushshekhar018](https://github.com/ayushshekhar018)
 
-GitHub: [@ayushshekhar018](https://github.com/ayushshekhar018)
-
----
-
-If you find a bug or have a suggestion, feel free to open an issue in the repository.
+Issues and constructive suggestions are welcome through the repository's [Issues](https://github.com/ayushshekhar018/employee-management-system/issues) section.
