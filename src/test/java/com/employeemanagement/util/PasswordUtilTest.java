@@ -138,4 +138,65 @@ class PasswordUtilTest {
         assertTrue(PasswordUtil.verifyForAccount("demo.employee@example.com", "admin", password, stored));
     }
 
+
+    @Test
+    void normalizePassword_trimsUnicodeWhitespaceOnlyAtTheEdges() {
+        String nonBreakingSpace = Character.toString(0x00A0);
+
+        assertEquals(
+                "DemoEmployee@2026!",
+                PasswordUtil.normalizePassword(" \tDemoEmployee@2026!" + nonBreakingSpace)
+        );
+    }
+
+    @Test
+    void normalizePassword_rejectsWhitespaceInsidePassword() {
+        assertThrows(IllegalArgumentException.class,
+                () -> PasswordUtil.normalizePassword("Demo Employee@2026!"));
+        assertThrows(IllegalArgumentException.class,
+                () -> PasswordUtil.normalizePassword("Demo\tEmployee@2026!"));
+        assertThrows(IllegalArgumentException.class,
+                () -> PasswordUtil.normalizePassword("Demo\nEmployee@2026!"));
+        assertThrows(IllegalArgumentException.class,
+                () -> PasswordUtil.normalizePassword(
+                        "Demo" + Character.toString(0x00A0) + "Employee@2026!"
+                ));
+        assertThrows(IllegalArgumentException.class,
+                () -> PasswordUtil.normalizePassword(
+                        "Demo" + Character.toString(0x200B) + "Employee@2026!"
+                ));
+    }
+
+    @Test
+    void demoAccountVerificationAcceptsTrimmedInputButRejectsInternalWhitespace() {
+        String email = "demo.employee@example.com";
+        String storedPassword = "DemoEmployee@2026!";
+
+        assertTrue(PasswordUtil.verifyForAccount(
+                email, "employee", "  DemoEmployee@2026!\t", storedPassword
+        ));
+        assertFalse(PasswordUtil.verifyForAccount(
+                email, "employee", "Demo Employee@2026!", storedPassword
+        ));
+    }
+
+    @Test
+    void hashForAccountStoresNormalizedPassword() {
+        assertEquals(
+                "DemoEmployee@2026!",
+                PasswordUtil.hashForAccount(
+                        "demo.employee@example.com",
+                        "employee",
+                        "  DemoEmployee@2026!  "
+                )
+        );
+    }
+
+    @Test
+    void hashAndBcryptVerificationUseTheSamePasswordNormalization() {
+        String hash = PasswordUtil.hash("  secure123  ");
+        assertTrue(PasswordUtil.verify("secure123", hash));
+        assertFalse(PasswordUtil.verify("secure 123", hash));
+    }
+
 }
