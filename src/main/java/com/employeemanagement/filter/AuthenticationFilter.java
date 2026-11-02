@@ -22,6 +22,7 @@ import java.util.List;
 public class AuthenticationFilter implements Filter {
 
     // These routes and static resources are available without an authenticated session.
+    // Routes and static resources that can be requested without a signed-in session.
     private static final List<String> PUBLIC_URLS = Arrays.asList(
             "/login",
             "/logout",
@@ -34,6 +35,7 @@ public class AuthenticationFilter implements Filter {
     );
 
     // These routes require a signed-in user but are not restricted to administrators.
+    // Routes available to any authenticated account.
     private static final List<String> AUTHENTICATED_PATTERNS = Arrays.asList(
             "/dashboard",
             "/my-projects",
@@ -45,6 +47,7 @@ public class AuthenticationFilter implements Filter {
     );
 
     // These routes are reserved for accounts whose session role is admin.
+    // Routes reserved for users with the administrator role.
     private static final List<String> ADMIN_PATTERNS = Arrays.asList(
             "/employees",
             "/employees/new",
@@ -79,6 +82,7 @@ public class AuthenticationFilter implements Filter {
         String path = uri.substring(contextPath.length());
 
         // Public resources bypass session checks.
+        // Public resources bypass the session checks.
         if (isPublicUrl(path)) {
             chain.doFilter(request, response);
             return;
@@ -93,6 +97,7 @@ public class AuthenticationFilter implements Filter {
             }
 
             // Authentication alone is not sufficient for administrative operations.
+            // A signed-in session alone does not grant administrative access.
             if (isAdminUrl(path)) {
                 String userRole = (String) session.getAttribute("userRole");
                 if (userRole == null || !"admin".equalsIgnoreCase(userRole)) {
