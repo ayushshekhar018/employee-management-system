@@ -8,18 +8,12 @@ import org.hibernate.Transaction;
 
 import java.util.List;
 
-/**
- * Authentication and account lookup operations backed by Employee records.
- */
-/**
- * Authentication and account lookup operations backed by Employee records.
- */
+/** Authentication and account lookup operations backed by Employee records. */
 public class UserDAO {
 
     public Employee authenticate(String email, String password) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            // Bind the email as a query parameter rather than concatenating user input into HQL.
-            // Bind email as a parameter instead of concatenating user input into HQL.
+            // Bind the email as a parameter instead of concatenating user input into HQL.
             List<Employee> employees = session.createQuery(
                     "from Employee e where e.email = :email",
                     Employee.class
@@ -29,12 +23,24 @@ public class UserDAO {
 
             if (employees != null && !employees.isEmpty()) {
                 Employee employee = employees.get(0);
-                if (PasswordUtil.verify(password, employee.getPassword())) {
-                    // Rehash password if it uses outdated settings (e.g., low log rounds)
-                    if (PasswordUtil.needsRehash(employee.getPassword())) {
-                        // Upgrade older hashes after a successful login without changing the user's password.
-                        // Upgrade older hashes after successful verification without changing the password.
-                        String newHash = PasswordUtil.hash(password);
+
+                if (PasswordUtil.verifyForAccount(
+                        employee.getEmail(),
+                        employee.getRole(),
+                        password,
+                        employee.getPassword()
+                )) {
+                    // Only BCrypt accounts participate in automatic hash upgrades.
+                    if (PasswordUtil.needsRehashForAccount(
+                            employee.getEmail(),
+                            employee.getRole(),
+                            employee.getPassword()
+                    )) {
+                        String newHash = PasswordUtil.hashForAccount(
+                                employee.getEmail(),
+                                employee.getRole(),
+                                password
+                        );
                         Transaction tx = session.beginTransaction();
                         employee.setPassword(newHash);
                         session.merge(employee);
@@ -68,11 +74,7 @@ public class UserDAO {
     }
 
     /**
-     * Update an employee's password with a new BCrypt hash.
-     *
-     * @param employeeId the employee ID
-     * @param newPassword the plain-text new password
-     * @return true if the password was updated successfully
+     * Update an employee password using the account's configured password policy.
      */
     public boolean updatePassword(long employeeId, String newPassword) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -80,9 +82,14 @@ public class UserDAO {
             if (employee == null) {
                 return false;
             }
-            String newHash = PasswordUtil.hash(newPassword);
+
+            String storedPassword = PasswordUtil.hashForAccount(
+                    employee.getEmail(),
+                    employee.getRole(),
+                    newPassword
+            );
             Transaction tx = session.beginTransaction();
-            employee.setPassword(newHash);
+            employee.setPassword(storedPassword);
             session.merge(employee);
             tx.commit();
             return true;
