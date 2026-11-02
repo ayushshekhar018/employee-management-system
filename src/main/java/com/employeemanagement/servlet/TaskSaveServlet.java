@@ -14,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Handles task form rendering, validation, and task creation. */
 @WebServlet("/tasks/save")
 public class TaskSaveServlet extends HttpServlet {
     private final TaskDAO taskDao = new TaskDAO();
@@ -34,6 +35,7 @@ public class TaskSaveServlet extends HttpServlet {
         String dueParam = req.getParameter("dueDate");
         String error = null;
         long projectId = 0; Long assigneeId = null; LocalDate dueDate = null;
+        // Validate request data before passing it to the persistence layer.
         try {
             if (title == null || title.isBlank() || title.trim().length() > 150) throw new IllegalArgumentException("Enter a task title (up to 150 characters).");
             if (!"low".equals(priority) && !"medium".equals(priority) && !"high".equals(priority)) throw new IllegalArgumentException("Choose a valid priority.");
