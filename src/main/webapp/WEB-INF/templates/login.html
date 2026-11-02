@@ -23,11 +23,37 @@
         <form th:action="@{/login}" method="post" th:object="${login}">
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="text" id="email" name="email" th:field="*{email}" placeholder="Enter your email" required>
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        th:field="*{email}"
+                        placeholder="Enter your email"
+                        autocomplete="username"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        inputmode="email"
+                        required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" th:field="*{password}" placeholder="Enter your password" required>
+                <div class="login-password-field">
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            th:field="*{password}"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required>
+                    <button
+                            type="button"
+                            id="togglePassword"
+                            class="password-toggle"
+                            aria-controls="password"
+                            aria-label="Show password"
+                            aria-pressed="false">Show</button>
+                </div>
             </div>
             <div class="form-actions center-actions">
                 <button type="submit" class="btn btn-primary full-width">Sign In</button>
@@ -35,5 +61,27 @@
         </form>
     </div>
 </div>
+<script>
+    (() => {
+        const passwordInput = document.getElementById("password");
+        const toggleButton = document.getElementById("togglePassword");
+
+        if (!passwordInput || !toggleButton) {
+            return;
+        }
+
+        toggleButton.addEventListener("click", () => {
+            const shouldShowPassword = passwordInput.type === "password";
+
+            passwordInput.type = shouldShowPassword ? "text" : "password";
+            toggleButton.textContent = shouldShowPassword ? "Hide" : "Show";
+            toggleButton.setAttribute(
+                "aria-label",
+                shouldShowPassword ? "Hide password" : "Show password"
+            );
+            toggleButton.setAttribute("aria-pressed", String(shouldShowPassword));
+        });
+    })();
+</script>
 </body>
 </html>
