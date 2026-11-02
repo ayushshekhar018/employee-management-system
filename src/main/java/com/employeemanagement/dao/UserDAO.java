@@ -16,6 +16,7 @@ public class UserDAO {
     public Employee authenticate(String email, String password) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             // Bind the email as a query parameter rather than concatenating user input into HQL.
+            // Bind email as a parameter instead of concatenating user input into HQL.
             List<Employee> employees = session.createQuery(
                     "from Employee e where e.email = :email",
                     Employee.class
@@ -29,6 +30,7 @@ public class UserDAO {
                     // Rehash password if it uses outdated settings (e.g., low log rounds)
                     if (PasswordUtil.needsRehash(employee.getPassword())) {
                         // Upgrade older hashes after a successful login without changing the user's password.
+                        // Upgrade older hashes after successful verification without changing the password.
                         String newHash = PasswordUtil.hash(password);
                         Transaction tx = session.beginTransaction();
                         employee.setPassword(newHash);
