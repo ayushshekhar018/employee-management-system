@@ -87,6 +87,7 @@ public class EmployeeDAO {
                 }
 
                 // Remove the employee from the inverse project collections before deletion.
+                // Remove the employee from project collections before deleting the employee row.
                 for (Project project : employee.getProjects()) {
                     project.getEmployees().remove(employee);
                 }
@@ -108,6 +109,7 @@ public class EmployeeDAO {
 
             try {
                 // Update the managed entity so Hibernate tracks the field changes.
+                // Modify the managed entity so Hibernate tracks the changed fields.
                 Employee existing = session.find(Employee.class, employee.getId());
 
                 if (existing == null) {
