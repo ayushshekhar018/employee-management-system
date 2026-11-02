@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Data access operations for projects and their many-to-many employee allocations.
+ */
 public class ProjectDAO {
 
     public List<Project> findAll() {
@@ -81,6 +84,7 @@ public class ProjectDAO {
                     return;
                 }
 
+                // Clear the join-table relationship before deleting the project.
                 project.getEmployees().clear();
 
                 session.remove(project);
@@ -163,6 +167,7 @@ public class ProjectDAO {
                     return false;
                 }
 
+                // Enforce the configured team capacity before modifying either side of the relationship.
                 if (project.getEmployees().size() >= project.getMaximumTeamSize()) {
                     transaction.rollback();
                     return false;
@@ -179,6 +184,7 @@ public class ProjectDAO {
                     return false;
                 }
 
+                // Keep both sides of the bidirectional many-to-many association in sync.
                 project.getEmployees().add(employee);
                 employee.getProjects().add(project);
 
@@ -230,6 +236,7 @@ public class ProjectDAO {
                     return errors;
                 }
 
+                // Validate independently so one invalid project does not block other eligible allocations.
                 for (Long projectId : projectIds) {
                     Project project = session.find(Project.class, projectId);
                     if (project == null) {
