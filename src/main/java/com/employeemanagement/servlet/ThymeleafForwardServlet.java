@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Renders the template selected by ThymeleafConfig.forward. */
 @WebServlet("/thymeleaf/forward")
 public class ThymeleafForwardServlet extends HttpServlet {
 
@@ -36,6 +37,7 @@ public class ThymeleafForwardServlet extends HttpServlet {
         }
 
         Map<String, Object> variables = new HashMap<>();
+        // Internal dispatcher attributes are control data, not template model variables.
         req.getAttributeNames().asIterator().forEachRemaining(name -> {
             if (!name.startsWith("_")) {
                 variables.put(name, req.getAttribute(name));
