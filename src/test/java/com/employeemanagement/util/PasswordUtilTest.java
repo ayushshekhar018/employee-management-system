@@ -106,4 +106,36 @@ class PasswordUtilTest {
         assertTrue(PasswordUtil.verify(plain, hash));
         assertFalse(PasswordUtil.verify("WrongPassword", hash));
     }
+
+    @Test
+    void demoAccountUsesPlainTextOnlyForPublishedEmployeeIdentity() {
+        String email = "demo.employee@example.com";
+        String role = "employee";
+        String password = "DemoEmployee@2026!";
+
+        assertEquals(password, PasswordUtil.hashForAccount(email, role, password));
+        assertTrue(PasswordUtil.verifyForAccount(email, role, password, password));
+        assertFalse(PasswordUtil.verifyForAccount(email, role, "wrong-password", password));
+        assertFalse(PasswordUtil.needsRehashForAccount(email, role, password));
+    }
+
+    @Test
+    void nonDemoAccountsContinueToUseBcrypt() {
+        String password = "secure123";
+        String stored = PasswordUtil.hashForAccount("person@example.com", "employee", password);
+
+        assertTrue(stored.startsWith("$2a$") || stored.startsWith("$2b$"));
+        assertTrue(PasswordUtil.verifyForAccount("person@example.com", "employee", password, stored));
+        assertFalse(PasswordUtil.verifyForAccount("person@example.com", "employee", "wrong-pass", stored));
+    }
+
+    @Test
+    void demoEmailWithAdminRoleStillUsesBcrypt() {
+        String password = "secure123";
+        String stored = PasswordUtil.hashForAccount("demo.employee@example.com", "admin", password);
+
+        assertTrue(stored.startsWith("$2a$") || stored.startsWith("$2b$"));
+        assertTrue(PasswordUtil.verifyForAccount("demo.employee@example.com", "admin", password, stored));
+    }
+
 }
