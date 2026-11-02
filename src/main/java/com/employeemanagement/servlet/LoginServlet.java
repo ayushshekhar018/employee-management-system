@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import com.employeemanagement.dao.UserDAO;
 import com.employeemanagement.config.ThymeleafConfig;
 import com.employeemanagement.model.Employee;
+import com.employeemanagement.util.PasswordUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,13 +38,21 @@ public class LoginServlet extends HttpServlet {
 
         req.setCharacterEncoding("UTF-8");
 
-        // Normalize surrounding whitespace in the email, but never modify the password.
+        // Email is trimmed. Password normalization removes only surrounding whitespace
+        // and rejects whitespace inside the password.
         String email = req.getParameter("email");
         email = email == null ? null : email.trim();
         String password = req.getParameter("password");
 
         if (email == null || email.isBlank() || password == null || password.isEmpty()) {
             renderLoginError(req, res, email, "Enter both your email address and password.");
+            return;
+        }
+
+        try {
+            password = PasswordUtil.normalizePassword(password);
+        } catch (IllegalArgumentException exception) {
+            renderLoginError(req, res, email, exception.getMessage());
             return;
         }
 
