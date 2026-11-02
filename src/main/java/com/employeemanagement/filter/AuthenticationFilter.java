@@ -15,9 +15,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Applies route-level authentication and administrator access checks.
+ */
 @WebFilter(filterName = "2_AuthenticationFilter", urlPatterns = "/*")
 public class AuthenticationFilter implements Filter {
 
+    // These routes and static resources are available without an authenticated session.
     private static final List<String> PUBLIC_URLS = Arrays.asList(
             "/login",
             "/logout",
@@ -29,6 +33,7 @@ public class AuthenticationFilter implements Filter {
             "/error/"
     );
 
+    // These routes require a signed-in user but are not restricted to administrators.
     private static final List<String> AUTHENTICATED_PATTERNS = Arrays.asList(
             "/dashboard",
             "/my-projects",
@@ -39,6 +44,7 @@ public class AuthenticationFilter implements Filter {
             "/allocate/result"
     );
 
+    // These routes are reserved for accounts whose session role is admin.
     private static final List<String> ADMIN_PATTERNS = Arrays.asList(
             "/employees",
             "/employees/new",
@@ -72,6 +78,7 @@ public class AuthenticationFilter implements Filter {
 
         String path = uri.substring(contextPath.length());
 
+        // Public resources bypass session checks.
         if (isPublicUrl(path)) {
             chain.doFilter(request, response);
             return;
@@ -85,6 +92,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
+            // Authentication alone is not sufficient for administrative operations.
             if (isAdminUrl(path)) {
                 String userRole = (String) session.getAttribute("userRole");
                 if (userRole == null || !"admin".equalsIgnoreCase(userRole)) {
