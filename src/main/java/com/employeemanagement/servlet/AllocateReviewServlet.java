@@ -15,6 +15,9 @@ import com.employeemanagement.model.Project;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Validates a proposed multi-project allocation and renders a review before confirmation.
+ */
 @WebServlet("/allocate/review")
 public class AllocateReviewServlet extends HttpServlet {
 
@@ -88,6 +91,7 @@ public class AllocateReviewServlet extends HttpServlet {
             return;
         }
 
+        // Keep the selected identifiers in the session for the separate confirmation request.
         HttpSession session = req.getSession(true);
         session.setAttribute("allocEmployeeId", employeeId);
         session.setAttribute("allocProjectIds", projectIds);
