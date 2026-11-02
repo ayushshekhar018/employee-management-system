@@ -1,6 +1,9 @@
 package com.employeemanagement.dao;
 
 import com.employeemanagement.model.Employee;
+import com.employeemanagement.model.Project;
+import com.employeemanagement.model.Task;
+import java.time.LocalDate;
 import org.junit.jupiter.api.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -81,4 +84,48 @@ class EmployeeDAOTest extends BaseDAOTest {
     void save_nullEmployee_noOp() {
         assertDoesNotThrow(() -> dao.save(null));
     }
+
+    @Test
+    void delete_employeeUnassignsExistingTasksInsteadOfViolatingForeignKey() {
+        Project project = new Project(
+                "Employee Delete Test",
+                "Test Client",
+                LocalDate.now(),
+                1000.0,
+                2,
+                "active"
+        );
+        new ProjectDAO().save(project);
+
+        Employee employee = new Employee(
+                "Testing",
+                50000.0,
+                "Assigned Employee",
+                "assigned-delete-test@example.com",
+                "Tester",
+                "unused-password"
+        );
+        dao.save(employee);
+
+        TaskDAO taskDao = new TaskDAO();
+        taskDao.create(
+                "Preserve task after employee deletion",
+                "The employee assignment should be cleared.",
+                "medium",
+                "todo",
+                LocalDate.now().plusDays(7),
+                project.getId(),
+                employee.getId()
+        );
+
+        assertTrue(dao.delete(employee.getId()));
+
+        Task remainingTask = taskDao.findAll().stream()
+                .filter(task -> "Preserve task after employee deletion".equals(task.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Task should remain after employee deletion."));
+
+        assertNull(remainingTask.getAssignee());
+    }
+
 }
