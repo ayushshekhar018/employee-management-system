@@ -9,15 +9,16 @@ import com.employeemanagement.dao.EmployeeDAO;
 import com.employeemanagement.util.PasswordUtil;
 import com.employeemanagement.model.Employee;
 import com.employeemanagement.config.ThymeleafConfig;
-import java.util.Map;
 
+import java.util.Map;
 import java.io.IOException;
 
 /** Loads and updates an existing employee record. */
 @WebServlet("/employees/update")
 public class EmployeeUpdateServlet extends HttpServlet {
 
-    private EmployeeDAO employeeDao = new EmployeeDAO();
+    private final EmployeeDAO employeeDao = new EmployeeDAO();
+
     @Override
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse res)
@@ -25,10 +26,7 @@ public class EmployeeUpdateServlet extends HttpServlet {
 
         String idParam = req.getParameter("id");
         if (idParam == null || idParam.isBlank()) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Employee ID is required"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Employee ID is required");
             return;
         }
 
@@ -36,51 +34,34 @@ public class EmployeeUpdateServlet extends HttpServlet {
         try {
             id = Long.parseLong(idParam);
         } catch (NumberFormatException e) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid employee ID"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid employee ID");
             return;
         }
 
         Employee employee = employeeDao.findId(id);
-
         if (employee == null) {
-            res.sendError(
-                    HttpServletResponse.SC_NOT_FOUND,
-                    "Employee not found"
-            );
+            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Employee not found");
             return;
         }
 
-        ThymeleafConfig.render(
-                req,
-                res,
-                Map.of("employee", employee),
-                "update-employee"
-        );
+        ThymeleafConfig.render(req, res, Map.of("employee", employee), "update-employee");
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
         String idParam = req.getParameter("id");
 
         if (idParam == null || idParam.isBlank()) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Employee ID is missing"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Employee ID is missing");
             return;
         }
 
-        Long id;
+        long id;
         try {
             id = Long.parseLong(idParam);
         } catch (NumberFormatException e) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid employee ID"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid employee ID");
             return;
         }
 
@@ -90,29 +71,21 @@ public class EmployeeUpdateServlet extends HttpServlet {
         String newPassword = req.getParameter("newPassword");
 
         if (salaryParam == null || salaryParam.isBlank()) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Salary is missing from the form"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Salary is missing from the form");
             return;
         }
 
         double salary;
-
         try {
             salary = Double.parseDouble(salaryParam);
         } catch (NumberFormatException e) {
-            res.sendError(
-                    HttpServletResponse.SC_BAD_REQUEST,
-                    "Invalid salary value"
-            );
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid salary value");
             return;
         }
 
         Employee employee = employeeDao.findId(id);
-
-        if(employee == null){
-            res.sendError(404,"Not Found");
+        if (employee == null) {
+            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Employee not found");
             return;
         }
 
@@ -120,21 +93,27 @@ public class EmployeeUpdateServlet extends HttpServlet {
         employee.setDept(dept);
         employee.setSalary(salary);
 
-        // An empty password field means the existing password should remain unchanged.
+        // An empty password field leaves the current password unchanged.
         if (newPassword != null && !newPassword.isEmpty()) {
             try {
-                employee.setPassword(PasswordUtil.hash(newPassword));
+                // The demo account follows its explicit plain-text exception; other accounts use BCrypt.
+                employee.setPassword(PasswordUtil.hashForAccount(
+                        employee.getEmail(),
+                        employee.getRole(),
+                        newPassword
+                ));
             } catch (IllegalArgumentException e) {
-                req.setAttribute("error", e.getMessage());
-                req.setAttribute("employee", employee);
-                ThymeleafConfig.render(req, res, Map.of("employee", employee, "error", e.getMessage()), "update-employee");
+                ThymeleafConfig.render(
+                        req,
+                        res,
+                        Map.of("employee", employee, "error", e.getMessage()),
+                        "update-employee"
+                );
                 return;
             }
         }
 
         employeeDao.update(employee);
-
-        
-        res.sendRedirect(req.getContextPath()+"/employees");
+        res.sendRedirect(req.getContextPath() + "/employees");
     }
 }
