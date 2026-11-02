@@ -50,7 +50,7 @@ public class ErrorServlet extends HttpServlet {
         variables.put("statusCode", statusCode);
         variables.put("errorMessage", errorMessage);
         variables.put("requestUri", requestUri != null ? requestUri : "");
-        variables.put("exceptionType", exceptionType);
+        // Exception class names are intentionally omitted from the public error page.
 
         String templateName = "error";
 
