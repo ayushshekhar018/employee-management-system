@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Hibernate entity for a project and its allocated employees.
+ */
 @Entity
 @Table(name = "projectinfo")
 public class Project {
@@ -33,6 +36,7 @@ public class Project {
     @Column(name = "status", nullable = true, length = 20)
     private String status;
 
+    // Project owns the join table for the bidirectional employee association.
     @ManyToMany
     @JoinTable(
         name = "employee_project",
