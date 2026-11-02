@@ -14,6 +14,9 @@ import java.io.IOException;
 /**
  * Logs the application-relative request path and processing duration.
  */
+/**
+ * Logs the application-relative request path and processing duration.
+ */
 @WebFilter(filterName = "1_RequestLoggingFilter", urlPatterns = "/*")
 public class RequestLoggingFilter implements Filter {
 
