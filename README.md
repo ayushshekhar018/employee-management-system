@@ -1,145 +1,102 @@
 # Employee & Project Management System
 
-A server-rendered Java web application for managing employee records, projects, task assignments, and employee-to-project allocations. It includes role-aware access control, BCrypt password hashing, Hibernate-based persistence, and Thymeleaf views.
-
-<p align="left">
-  <a href="https://employee-management-system-wavl.onrender.com/login"><img alt="Live Demo" src="https://img.shields.io/badge/Live%20Demo-Render-46A758?style=for-the-badge&logo=render&logoColor=white"></a>
-  <a href="https://github.com/ayushshekhar018/employee-management-system"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github"></a>
+<p align="center">
+  <a href="https://employee-management-system-wavl.onrender.com/login">
+    <img src="https://img.shields.io/badge/LIVE%20DEMO-Render-46A758?style=for-the-badge&logo=render&logoColor=white" alt="Live demo on Render">
+  </a>
+  <img src="https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17">
+  <img src="https://img.shields.io/badge/Jakarta%20Servlet-6.1-1B6AC6?style=for-the-badge" alt="Jakarta Servlet 6.1">
+  <img src="https://img.shields.io/badge/Hibernate-ORM%207-59666C?style=for-the-badge&logo=hibernate&logoColor=white" alt="Hibernate ORM 7">
+  <img src="https://img.shields.io/badge/Database-TiDB%20%7C%20MySQL%20Compatible-DC382D?style=for-the-badge" alt="TiDB MySQL compatible">
 </p>
 
-**Live application:** https://employee-management-system-wavl.onrender.com/login  
-**Repository:** https://github.com/ayushshekhar018/employee-management-system
+A server-rendered Java web application for managing employees, projects, team allocations, and project tasks. The application uses Jakarta Servlets for request handling, Thymeleaf for server-side views, Hibernate ORM for persistence, and BCrypt for password hashing.
 
-> **Deployment status:** The application is deployed and has passed Render's \`/login\` health check. The public login page is reachable. Database-backed workflows should be considered verified only after a successful login and CRUD test against the hosted TiDB database.
+**Live demo:** [employee-management-system-wavl.onrender.com/login](https://employee-management-system-wavl.onrender.com/login)  
+**Source code:** [github.com/ayushshekhar018/employee-management-system](https://github.com/ayushshekhar018/employee-management-system)
 
-## Features
+> **Deployment status:** The Render deployment is live and its `/login` health check has succeeded. The login page has been opened successfully in a browser. Database-backed login and CRUD workflows still need an end-to-end verification; a successful web health check alone does not prove that the hosted database connection works.
 
-### Authentication and access
-- Login and logout using server-side HTTP sessions.
-- BCrypt password hashing and verification.
-- Automatic rehashing of older BCrypt hashes after successful authentication when the configured work factor is outdated.
-- Route-level authentication checks and administrator-only route checks.
+---
 
-### Employee management
-- Create, view, update, and delete employee records.
-- Store employee details such as department, designation, email, salary, and role.
-- View an employee's assigned projects.
+## Product overview
 
-### Project management
-- Create, view, update, and delete projects.
-- Track client, start date, budget, status, and maximum team size.
-- View the employees currently allocated to each project.
+The Employee & Project Management System provides a single web interface for maintaining employee records, organizing projects, allocating people to project teams, and tracking work through a task board.
 
-### Allocation management
-- Allocate an employee to an individual project.
-- Review a multi-project allocation before confirming it.
-- Validate project status, team capacity, and duplicate allocations.
-- Display per-project success and failure results for batch allocation.
+### What it can do
 
-### Task management
-- Create tasks under a project and optionally assign them to an employee.
-- Set priority, status, and due date.
-- Show an administrator-wide task board or an employee-specific task list.
-- Restrict employee task-status changes to tasks assigned to that employee.
+- **Authentication and roles** — session-based sign-in and sign-out, BCrypt password verification, and route-level access checks for authenticated users and administrators.
+- **Employee management** — create, view, edit, and delete employee records containing department, designation, email, salary, and role information.
+- **Project management** — maintain project details such as client, start date, budget, status, and maximum team size.
+- **Team allocation** — allocate employees to projects, review multi-project allocations before confirmation, and report project-specific successes or validation failures.
+- **Task management** — create project tasks, optionally assign an employee, set priority and due date, and track task status.
+- **Employee project views** — view the projects associated with an employee and show employees assigned to a project.
 
-## Live deployment
+---
 
-The public demo uses the following architecture:
+## Technology
 
-| Component | Platform / configuration |
-|---|---|
-| Application hosting | [Render](https://render.com/) |
-| Application runtime | Docker container running Apache Tomcat 11 |
-| Build | Maven; packages the project as a WAR |
-| Database hosting | [TiDB Cloud Starter](https://tidbcloud.com/) |
-| Database compatibility | MySQL-compatible |
-| Database name | \`employeedb\` |
-| Database region | AWS Singapore (\`ap-southeast-1\`) |
-| Public application URL | [employee-management-system-wavl.onrender.com/login](https://employee-management-system-wavl.onrender.com/login) |
-| Deployment branch | \`deploy/render-tidb\` |
+The versions below reflect the dependencies and build configuration in [pom.xml](pom.xml).
 
-### Deployment configuration in this repository
+**Application and build**
+- Java 17 language target
+- Apache Maven
+- WAR packaging
+- Jakarta Servlet API 6.1
+- Apache Tomcat 11
+- Docker for the hosted runtime
 
-The \`deploy/render-tidb\` branch contains the hosting configuration:
+**Persistence and presentation**
+- Hibernate ORM 7.4.11.Final
+- MySQL Connector/J 26.10.0
+- MySQL-compatible TiDB Cloud database for the hosted demo
+- Thymeleaf 3.1.5.RELEASE
+- jBCrypt 0.4
 
-- \`Dockerfile\` — builds the WAR with Maven and runs it on Tomcat 11.
-- \`docker-entrypoint.sh\` — configures Tomcat to listen on Render's \`PORT\`.
-- \`.dockerignore\` — excludes IDE and generated build files from the Docker build context.
-- \`render.yaml\` — Render Blueprint configuration.
-- \`HibernateUtil.java\` — reads hosted database connection settings from environment variables when \`DB_HOST\` is configured.
+**Testing**
+- JUnit Jupiter 6.1.3
+- H2 2.5.252 (test scope)
 
-The deployment branch is kept separate from \`master\` so that the local-development baseline and hosted deployment configuration remain distinct.
+The Servlet API dependency uses Maven's `provided` scope because the servlet container supplies it at runtime.
 
-### Environment variables
-
-The Render service uses these variables. **Actual credentials are intentionally not stored in this repository.**
-
-| Variable | Purpose | Hosted value / setting |
-|---|---|---|
-| \`DB_HOST\` | TiDB endpoint hostname | Stored in Render environment settings |
-| \`DB_PORT\` | TiDB MySQL-compatible port | \`4000\` |
-| \`DB_NAME\` | Database/schema name | \`employeedb\` |
-| \`DB_USERNAME\` | TiDB database username | Stored in Render environment settings |
-| \`DB_PASSWORD\` | TiDB database password | Stored as a secret in Render |
-| \`DB_SSL_MODE\` | JDBC TLS verification mode | \`VERIFY_IDENTITY\` |
-
-When \`DB_HOST\` is absent, local development uses the values in \`src/main/resources/hibernate.cfg.xml\`. When \`DB_HOST\` is present, the application requires \`DB_NAME\`, \`DB_USERNAME\`, and \`DB_PASSWORD\`; \`DB_PORT\` defaults to \`4000\` and \`DB_SSL_MODE\` defaults to \`VERIFY_IDENTITY\`.
-
-### Free-tier behaviour
-
-This deployment is intended as a portfolio/demo environment, not production hosting.
-
-- Render's free web service may spin down after inactivity. The first request after an idle period can be noticeably slower.
-- Render free services do not provide a persistent local filesystem. Application data belongs in the external database, not in container-local files.
-- TiDB Cloud Starter has usage and storage quotas. It is not an unlimited database plan; check the provider's current limits and usage dashboard.
-- Availability, quotas, and free-tier terms can change. Review the providers' current documentation before relying on the demo for important data.
-
-Provider documentation: [Render Free](https://render.com/docs/free) · [Render Docker web services](https://render.com/docs/web-services) · [TiDB Cloud Starter](https://docs.pingcap.com/tidbcloud/select-cluster-tier/).
-
-## Technology stack
-
-| Area | Technology |
-|---|---|
-| Language | Java 17 |
-| Build and dependency management | Apache Maven |
-| Packaging | WAR |
-| Web layer | Jakarta Servlet API 6.1 |
-| Application server | Apache Tomcat 11.x |
-| Container | Docker |
-| ORM / persistence | Hibernate ORM 7 |
-| Database | MySQL / TiDB Cloud (MySQL-compatible) |
-| Server-side templates | Thymeleaf 3.1 |
-| Password hashing | jBCrypt |
-| Tests | JUnit Jupiter 6 and H2 (test scope) |
-
-Dependency versions are defined in [pom.xml](pom.xml). The Servlet API is declared with Maven's \`provided\` scope because the servlet container supplies it at runtime.
+---
 
 ## Architecture
 
-The codebase follows a layered, servlet-based MVC approach:
+The application follows a layered, servlet-based MVC design.
 
-1. **Servlets** receive HTTP requests, validate request parameters, coordinate application workflows, and select views.
-2. **DAO classes** encapsulate Hibernate queries and transactional data operations.
-3. **Model classes** define the \`Employee\`, \`Project\`, and \`Task\` persistence entities and their relationships.
-4. **Filters** apply request logging and session/role-based route checks.
-5. **Thymeleaf configuration and templates** render server-side HTML responses.
-6. **Hibernate** maps entities to database tables and manages persistence through a shared \`SessionFactory\`.
+```mermaid
+flowchart LR
+    Browser["Browser"] --> Render["Render Web Service"]
+    Render --> Tomcat["Docker · Tomcat 11"]
+    Tomcat --> Filters["Servlet Filters"]
+    Filters --> Servlets["Jakarta Servlets"]
+    Servlets --> Views["Thymeleaf Views"]
+    Servlets --> DAO["DAO Layer"]
+    DAO --> Hibernate["Hibernate ORM"]
+    Hibernate --> TiDB[("TiDB Cloud · MySQL Compatible")]
+```
 
-### Main source layout
+**Request and persistence flow**
 
-\`\`\`text
+1. A browser sends an HTTP request to the Render-hosted application.
+2. Servlet filters handle request logging and authentication/authorization checks.
+3. Servlets validate request parameters and coordinate application workflows.
+4. Thymeleaf renders server-side HTML templates.
+5. DAO classes execute data-access operations through Hibernate sessions and transactions.
+6. Hibernate maps the Employee, Project, and Task entities to the relational database.
+
+### Source layout
+
+```text
 employee-management-system/
 ├── pom.xml
-├── Dockerfile                  # Render deployment image
-├── docker-entrypoint.sh        # Render PORT configuration
-├── render.yaml                 # Render Blueprint
-├── .dockerignore
 ├── src/
 │   ├── main/
 │   │   ├── java/com/employeemanagement/
-│   │   │   ├── config/       # Thymeleaf lifecycle and rendering configuration
-│   │   │   ├── dao/          # Employee, project, task, and user data access
-│   │   │   ├── filter/       # Authentication and request logging filters
+│   │   │   ├── config/       # Thymeleaf application configuration
+│   │   │   ├── dao/          # Data-access objects
+│   │   │   ├── filter/       # Authentication and request logging
 │   │   │   ├── model/        # Hibernate entities
 │   │   │   ├── servlet/      # HTTP request handlers
 │   │   │   └── util/         # Hibernate and password utilities
@@ -152,10 +109,72 @@ employee-management-system/
 │   │       ├── css/
 │   │       └── index.jsp
 │   └── test/
-│       ├── java/              # DAO, model, and utility tests
+│       ├── java/              # Automated tests
 │       └── resources/         # Test Hibernate configuration
 └── README.md
-\`\`\`
+```
+
+The Render-specific deployment files are maintained in the [deploy/render-tidb branch](https://github.com/ayushshekhar018/employee-management-system/tree/deploy/render-tidb), keeping the default `master` branch focused on the application source.
+
+---
+
+## Live deployment
+
+The public demo runs on the following services:
+
+**Application hosting — Render**
+- Service: [employee-management-system](https://dashboard.render.com/)
+- Public URL: [https://employee-management-system-wavl.onrender.com/login](https://employee-management-system-wavl.onrender.com/login)
+- Runtime: Docker image containing Apache Tomcat 11
+- Region: Singapore
+- Compute plan: Free
+- Health check: `/login`
+- Deployment branch: `deploy/render-tidb`
+
+**Database hosting — TiDB Cloud Starter**
+- Cluster compatibility: MySQL
+- Cloud region: AWS Singapore (`ap-southeast-1`)
+- Database/schema: `employeedb`
+- MySQL-compatible port: `4000`
+- TLS mode: `VERIFY_IDENTITY`
+
+Database credentials are stored in Render's environment settings. They are not included in this repository.
+
+### Deployment files
+
+The [deployment branch](https://github.com/ayushshekhar018/employee-management-system/tree/deploy/render-tidb) contains the files used by Render:
+
+- [Dockerfile](https://github.com/ayushshekhar018/employee-management-system/blob/deploy/render-tidb/Dockerfile) — builds the WAR with Maven and runs it on Tomcat 11.
+- [docker-entrypoint.sh](https://github.com/ayushshekhar018/employee-management-system/blob/deploy/render-tidb/docker-entrypoint.sh) — configures Tomcat to listen on Render's `PORT`.
+- [.dockerignore](https://github.com/ayushshekhar018/employee-management-system/blob/deploy/render-tidb/.dockerignore) — excludes local IDE metadata and generated files from the Docker build context.
+- [render.yaml](https://github.com/ayushshekhar018/employee-management-system/blob/deploy/render-tidb/render.yaml) — declares the Render web service, region, plan, health check, and environment variables.
+- [HibernateUtil.java](https://github.com/ayushshekhar018/employee-management-system/blob/deploy/render-tidb/src/main/java/com/employeemanagement/util/HibernateUtil.java) — uses environment-provided database settings when `DB_HOST` is set.
+
+### Render environment variables
+
+Configure these values in the Render service's **Environment** page. Never commit real credentials to GitHub.
+
+- `DB_HOST` — TiDB endpoint hostname (hostname only; do not include the JDBC scheme).
+- `DB_PORT` — `4000`.
+- `DB_NAME` — `employeedb`.
+- `DB_USERNAME` — TiDB database username.
+- `DB_PASSWORD` — TiDB database password; store it as a secret.
+- `DB_SSL_MODE` — `VERIFY_IDENTITY`.
+
+When `DB_HOST` is absent, the application uses the local connection settings in `src/main/resources/hibernate.cfg.xml`. When `DB_HOST` is present, `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD` are required. The application uses port `4000` and TLS mode `VERIFY_IDENTITY` by default.
+
+### Deployment behaviour and free-tier limits
+
+This setup is intended for a portfolio demonstration and learning environment, not a production service.
+
+- Render Free web services spin down after 15 minutes without inbound traffic. A sleeping service can take about a minute to respond to the next request.
+- Render Free services have an ephemeral filesystem. Files written inside the container are not durable across restarts, redeploys, or spin-downs. Persistent application records belong in TiDB.
+- Render provides 750 free instance-hours per workspace per calendar month; the allowance is shared by the workspace's Free services.
+- TiDB Cloud Starter's published free quota for eligible instances is 5 GiB row storage, 5 GiB columnar storage, and 50 million Request Units per month. Usage is subject to provider limits and policy changes.
+
+Check the providers' live documentation before relying on free-tier capacity or availability.
+
+---
 
 ## Run locally
 
@@ -163,105 +182,149 @@ employee-management-system/
 
 - JDK 17
 - Apache Maven 3.8 or later
-- MySQL Server 8.0 or later
-- Apache Tomcat 11.x (or a compatible Servlet 6.1 container)
-- IntelliJ IDEA or another Java IDE (optional)
+- MySQL Server 8.0 or a compatible MySQL database
+- Apache Tomcat 11.x (or another Servlet 6.1-compatible container)
+- An IDE such as IntelliJ IDEA (optional)
 
-Verify the tools:
+Verify your local tools:
 
-\`\`\`bash
+~~~bash
 java -version
 mvn -version
 mysql --version
-\`\`\`
+~~~
 
 ### 1. Clone the repository
 
-\`\`\`bash
+~~~bash
 git clone https://github.com/ayushshekhar018/employee-management-system.git
 cd employee-management-system
-\`\`\`
+~~~
 
-### 2. Create a MySQL database
+### 2. Create the database
 
-\`\`\`sql
+Connect to your local MySQL instance and run:
+
+~~~sql
 CREATE DATABASE employeedb;
-\`\`\`
+~~~
 
-### 3. Configure Hibernate
+### 3. Configure the local database connection
 
-For local development, open \`src/main/resources/hibernate.cfg.xml\` and update the connection properties to match your local MySQL installation:
+Open `src/main/resources/hibernate.cfg.xml` and set the connection URL, username, and password for your local MySQL installation.
 
-\`\`\`xml
+~~~xml
 <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/employeedb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</property>
 <property name="hibernate.connection.username">YOUR_MYSQL_USERNAME</property>
 <property name="hibernate.connection.password">YOUR_MYSQL_PASSWORD</property>
-\`\`\`
+~~~
 
-Use a dedicated local database user where possible. Do not commit real credentials.
+Use a dedicated database user where possible. Do not commit local or production credentials.
 
-The current \`hibernate.hbm2ddl.auto=update\` setting is convenient for development, but it is not a substitute for managed schema migrations and backups. SQL output is enabled in the current Hibernate configuration; review this before production use.
+### 4. Build the WAR
 
-### 4. Build the application
+Run from the repository root:
 
-\`\`\`bash
+~~~bash
 mvn clean package
-\`\`\`
+~~~
 
-The WAR is generated at:
+The generated artifact is:
 
-\`\`\`text
+~~~text
 target/employee-management-system.war
-\`\`\`
+~~~
 
-### 5. Deploy locally to Tomcat
+### 5. Run on Tomcat
 
-Copy the WAR into Tomcat's \`webapps\` directory and start the server:
+Copy the WAR into Tomcat's `webapps` directory and start the server:
 
-\`\`\`bash
+~~~bash
 cp target/employee-management-system.war "$CATALINA_HOME/webapps/"
 "$CATALINA_HOME/bin/startup.sh"
-\`\`\`
+~~~
 
-Open:
+On Windows, use the corresponding `.bat` scripts under Tomcat's `bin` directory.
 
-\`\`\`text
+With the default WAR filename, open:
+
+~~~text
 http://localhost:8080/employee-management-system/
-\`\`\`
+~~~
 
-Tomcat 11 is recommended because the project uses Jakarta Servlet API 6.1. Do not deploy this WAR to a container that only supports the older \`javax.servlet\` namespace.
+Tomcat 11 implements Jakarta Servlet 6.1. Do not deploy this application to a container that only supports the older `javax.servlet` namespace.
 
-## Run tests
+---
 
-\`\`\`bash
+## Tests
+
+Run the automated test suite with:
+
+~~~bash
 mvn test
-\`\`\`
+~~~
 
-The project includes JUnit Jupiter tests and an H2 test dependency. Tests should use the configuration in \`src/test/resources/hibernate.cfg.xml\` and should not require the hosted production database.
+JUnit Jupiter and H2 are declared in test scope. Tests should use the configuration under `src/test/resources` and should not depend on the hosted TiDB instance.
 
-## Initial administrator account
+---
 
-The repository does not currently seed a default administrator account automatically. After the database tables have been created, create an administrator using the schema's actual column definitions and a BCrypt password hash generated with the project's \`PasswordUtil.hash()\` method. Never store a plain-text password in the password column.
+## Database initialization and first login
+
+The application does not currently seed a default administrator account or publish demo credentials.
+
+The deployment branch initializes Hibernate lazily on the first data-access operation. This keeps the login page and Render health check independent of database availability. Consequently, a successful `/login` health check confirms that the web application responds; it does **not** by itself confirm database authentication or CRUD functionality.
+
+The Hibernate configuration currently uses `hibernate.hbm2ddl.auto=update`, so mapped tables are created or updated when Hibernate first initializes successfully. Before using the live demo, verify database connectivity and create an administrator account with a BCrypt hash generated by the project's `PasswordUtil.hash()` method. Never store a plain-text password in the password column.
+
+---
 
 ## Security and production considerations
 
-Before using the application for real organizational data:
+Before using this application with real organizational data:
 
-- Store database credentials only in environment-backed secrets or a secrets manager.
-- Use a dedicated database account with minimum required privileges.
-- Restrict database network access and enforce TLS.
-- Enforce HTTPS.
-- Review authentication, session handling, and authorization rules.
-- Add CSRF protection for state-changing form submissions.
-- Review validation and error handling for all user-submitted fields.
-- Replace development schema auto-update with a controlled migration strategy.
+- Keep database credentials in environment-backed secrets or a secrets manager.
+- Use a dedicated database account with only the privileges the application requires.
+- Enforce TLS for database connections and HTTPS for browser traffic.
+- Add CSRF protection to state-changing form submissions.
+- Review session lifecycle, role checks, and authorization for every write operation.
+- Validate all user-submitted values on the server.
+- Replace schema auto-update with a controlled database migration process.
 - Disable or appropriately configure SQL logging.
-- Back up the database and test restore procedures.
-- Do not rely on free-tier hosting for production availability or critical data.
+- Establish database backups and test restoration.
+- Do not rely on free-tier hosting for production availability or critical records.
+
+---
+
+## Official documentation and references
+
+The following primary sources describe the platform behaviour and core technologies used by this project:
+
+**Hosting and deployment**
+- [Render — Web Services](https://render.com/docs/web-services)
+- [Render — Docker deployments](https://render.com/docs/docker)
+- [Render — Environment Variables and Secrets](https://render.com/docs/configure-environment-variables)
+- [Render — Free instance limitations](https://render.com/docs/free)
+- [Render — Deploys and manual deploys](https://render.com/docs/deploys)
+
+**Database and connectivity**
+- [TiDB Cloud Starter — FAQs and free quota](https://docs.pingcap.com/tidbcloud/serverless-faqs/?plan=starter)
+- [TiDB Cloud Starter — Select a cluster tier](https://docs.pingcap.com/tidbcloud/select-cluster-tier/)
+- [TiDB Cloud — Quick Start](https://docs.pingcap.com/tidbcloud/get-started/)
+- [MySQL Connector/J — Security properties and SSL modes](https://dev.mysql.com/doc/connector-j/en/connector-j-connp-props-security.html)
+
+**Java web stack**
+- [Apache Tomcat 11 documentation](https://tomcat.apache.org/tomcat-11.0-doc/)
+- [Jakarta Servlet 6.1 specification](https://jakarta.ee/specifications/servlet/6.1/)
+- [Java SE 17 documentation](https://docs.oracle.com/en/java/javase/17/)
+- [Apache Maven documentation](https://maven.apache.org/guides/)
+- [Hibernate ORM documentation](https://hibernate.org/orm/documentation/)
+- [Thymeleaf documentation](https://www.thymeleaf.org/documentation.html)
+
+---
 
 ## Author
 
 **Ayush Shekhar**  
 [GitHub: @ayushshekhar018](https://github.com/ayushshekhar018)
 
-Issues and constructive suggestions are welcome through the repository's [Issues](https://github.com/ayushshekhar018/employee-management-system/issues) section.
+Feedback, bug reports, and constructive suggestions are welcome through the repository's [Issues](https://github.com/ayushshekhar018/employee-management-system/issues).
