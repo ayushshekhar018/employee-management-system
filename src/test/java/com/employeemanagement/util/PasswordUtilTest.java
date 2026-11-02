@@ -141,9 +141,11 @@ class PasswordUtilTest {
 
     @Test
     void normalizePassword_trimsUnicodeWhitespaceOnlyAtTheEdges() {
+        String nonBreakingSpace = Character.toString(0x00A0);
+
         assertEquals(
                 "DemoEmployee@2026!",
-                PasswordUtil.normalizePassword(" \\tDemoEmployee@2026!\\u00A0")
+                PasswordUtil.normalizePassword(" \tDemoEmployee@2026!" + nonBreakingSpace)
         );
     }
 
@@ -152,13 +154,17 @@ class PasswordUtilTest {
         assertThrows(IllegalArgumentException.class,
                 () -> PasswordUtil.normalizePassword("Demo Employee@2026!"));
         assertThrows(IllegalArgumentException.class,
-                () -> PasswordUtil.normalizePassword("Demo\\tEmployee@2026!"));
+                () -> PasswordUtil.normalizePassword("Demo\tEmployee@2026!"));
         assertThrows(IllegalArgumentException.class,
-                () -> PasswordUtil.normalizePassword("Demo\\nEmployee@2026!"));
+                () -> PasswordUtil.normalizePassword("Demo\nEmployee@2026!"));
         assertThrows(IllegalArgumentException.class,
-                () -> PasswordUtil.normalizePassword("Demo\\u00A0Employee@2026!"));
+                () -> PasswordUtil.normalizePassword(
+                        "Demo" + Character.toString(0x00A0) + "Employee@2026!"
+                ));
         assertThrows(IllegalArgumentException.class,
-                () -> PasswordUtil.normalizePassword("Demo\\u200BEmployee@2026!"));
+                () -> PasswordUtil.normalizePassword(
+                        "Demo" + Character.toString(0x200B) + "Employee@2026!"
+                ));
     }
 
     @Test
@@ -167,7 +173,7 @@ class PasswordUtilTest {
         String storedPassword = "DemoEmployee@2026!";
 
         assertTrue(PasswordUtil.verifyForAccount(
-                email, "employee", "  DemoEmployee@2026!\\t", storedPassword
+                email, "employee", "  DemoEmployee@2026!\t", storedPassword
         ));
         assertFalse(PasswordUtil.verifyForAccount(
                 email, "employee", "Demo Employee@2026!", storedPassword
