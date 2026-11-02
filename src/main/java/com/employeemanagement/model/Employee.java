@@ -38,6 +38,7 @@ public class Employee {
     private String role;
 
     // Project owns the join table; this collection is the inverse side of the association.
+    // Project owns the join table; this is the inverse side of the association.
     @ManyToMany(mappedBy = "employees")
     private Set<Project> projects = new HashSet<>();
 
