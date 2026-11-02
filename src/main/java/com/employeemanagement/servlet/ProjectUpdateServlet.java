@@ -107,6 +107,27 @@ public class ProjectUpdateServlet extends HttpServlet {
             }
         }
 
+        if (projectName == null || projectName.isBlank() || projectName.length() > 150) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Project name is required and must be at most 150 characters.");
+            return;
+        }
+        if (clientName != null && clientName.length() > 150) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Client name must be at most 150 characters.");
+            return;
+        }
+        if (!Double.isFinite(budget) || budget < 0) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Budget must be a finite, non-negative number.");
+            return;
+        }
+        if (maximumTeamSize < 0) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Maximum team size cannot be negative.");
+            return;
+        }
+        if (!"planned".equals(status) && !"active".equals(status) && !"completed".equals(status)) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Choose a valid project status.");
+            return;
+        }
+
         existing.setProjectName(projectName);
         existing.setClientName(clientName);
         existing.setStartDate(startDate);
