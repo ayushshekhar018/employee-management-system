@@ -1,4 +1,7 @@
-<hibernate-configuration xmlns="http://www.hibernate.org/xsd/orm/cfg">
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
     <session-factory>
         <property name="hibernate.connection.url">jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</property>
         <property name="hibernate.connection.username">sa</property>
