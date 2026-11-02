@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn -B clean package -DskipTests
 
 # Tomcat 11 implements Jakarta Servlet 6.1, which this application uses.
-FROM tomcat:11-jre17-temurin
+FROM tomcat:11-jre25-temurin
 
 # Deploy as ROOT.war so the application is served from the service root.
 RUN rm -rf /usr/local/tomcat/webapps/*
