@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 /**
  * Task entity linked to one project and, optionally, one employee assignee.
  */
+/**
+ * Task entity linked to one project and, optionally, one employee assignee.
+ */
 @Entity
 @Table(name = "project_tasks")
 public class Task {
