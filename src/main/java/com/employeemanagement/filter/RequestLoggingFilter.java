@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 
+/**
+ * Logs the application-relative request path and processing duration.
+ */
 @WebFilter(filterName = "1_RequestLoggingFilter", urlPatterns = "/*")
 public class RequestLoggingFilter implements Filter {
 
@@ -28,6 +31,7 @@ public class RequestLoggingFilter implements Filter {
         String contextPath = httpRequest.getContextPath();
         String path = requestedUrl.substring(contextPath.length());
 
+        // Measure the complete downstream filter and servlet execution time.
         long startTime = System.currentTimeMillis();
 
         System.out.println("[RequestLogging] Incoming request -> " + path);
@@ -35,6 +39,7 @@ public class RequestLoggingFilter implements Filter {
         try {
             chain.doFilter(request, response);
         } finally {
+            // Log completion even if downstream request processing fails.
             long endTime = System.currentTimeMillis();
             long processingTime = endTime - startTime;
 
