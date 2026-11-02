@@ -88,6 +88,7 @@ public class EmployeeDAO {
 
                 // Remove the employee from the inverse project collections before deletion.
                 // Remove the employee from project collections before deleting the employee row.
+                // Remove the employee from project collections before deleting its record.
                 for (Project project : employee.getProjects()) {
                     project.getEmployees().remove(employee);
                 }
