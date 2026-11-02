@@ -8,7 +8,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import java.util.List;
 
+/**
+ * Persistence operations for project tasks, including assignment and status updates.
+ */
 public class TaskDAO {
+    // Fetch the associated project and optional assignee while the session is open.
     private static final String TASK_GRAPH = "select t from Task t join fetch t.project left join fetch t.assignee ";
 
     public List<Task> findAll() {
@@ -53,6 +57,7 @@ public class TaskDAO {
             Transaction tx = session.beginTransaction();
             try {
                 Task task = session.find(Task.class, taskId);
+                // Employees may update only their own assigned tasks; administrators can update any task.
                 if (task == null || (!administrator && (task.getAssignee() == null || task.getAssignee().getId() != employeeId))) {
                     tx.rollback(); return false;
                 }
