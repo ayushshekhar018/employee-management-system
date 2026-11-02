@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Team</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/projects}" class="nav-link">Projects</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <a th:href="@{/projects}">Projects</a>
+        <span class="separator">›</span>
+        <span>Project Team</span>
+    </div>
+
+    <div class="page-header">
+        <h1>👥 Project Team</h1>
+        <p class="page-subtitle"><a th:href="@{/projects}">← Back to Projects</a></p>
+    </div>
+
+    <!-- Project Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 th:text="${project.projectName}"></h2>
+            <span th:class="${'active'.equals(project.status)} ? 'badge badge-active' : (${'planned'.equals(project.status)} ? 'badge badge-planned' : 'badge badge-completed')"
+                  th:text="${#strings.toUpperCase(project.status)}"></span>
+        </div>
+        <div class="detail-list">
+            <div class="detail-item">
+                <span class="detail-label">Client</span>
+                <span class="detail-value" th:text="${project.clientName}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Team Capacity</span>
+                <span class="detail-value"><span th:text="${allocatedCount}"></span> / <span th:text="${maxTeamSize}"></span> members</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Team Members</h3>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Email</th>
+                    <th>Salary</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(allocatedEmployees)}">
+                    <td colspan="6" class="empty-cell">No employees allocated to this project yet.</td>
+                </tr>
+                <tr th:each="employee : ${allocatedEmployees}">
+                    <td th:text="${employee.id}"></td>
+                    <td><strong th:text="${employee.name}"></strong></td>
+                    <td th:text="${employee.dept}"></td>
+                    <td th:text="${employee.designation}"></td>
+                    <td th:text="${employee.email}"></td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(employee.salary, 1, 2)}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-2 d-flex gap-1 flex-wrap align-center">
+        <a th:href="@{/projects/allocate(projectId=${project.id})}"
+           class="btn btn-primary"
+           th:if="${!'completed'.equals(project.status) && allocatedCount < maxTeamSize}">
+            + Allocate More
+        </a>
+        <span th:if="${'completed'.equals(project.status)}" class="alert alert-error alert-inline">
+            <span class="alert-icon">🚫</span> Project completed — no new allocations.
+        </span>
+        <span th:if="${!'completed'.equals(project.status) && allocatedCount >= maxTeamSize}" class="alert alert-warning alert-inline">
+            <span class="alert-icon">⚠️</span> Team at maximum capacity.
+        </span>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

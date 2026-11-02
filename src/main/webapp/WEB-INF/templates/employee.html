@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee List</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <span>Employees</span>
+    </div>
+
+    <div class="page-header page-header-split">
+        <div>
+            <h1>Employee List</h1>
+            <p class="page-subtitle">Manage all employees in the system</p>
+        </div>
+        <div th:if="${'admin'.equals(session.userRole)}">
+            <a th:href="@{/employees/new}" class="btn btn-primary">+ Add Employee</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Email</th>
+                    <th>Salary</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="employee : ${employees}">
+                    <td th:text="${employee.id}"></td>
+                    <td><strong th:text="${employee.name}"></strong></td>
+                    <td th:text="${employee.dept}"></td>
+                    <td th:text="${employee.designation}"></td>
+                    <td th:text="${employee.email}"></td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(employee.salary, 1, 2)}"></td>
+                    <td>
+                        <div class="action-buttons">
+                            <a th:href="@{/employees/update(id=${employee.id})}"
+                               class="btn btn-sm btn-outline"
+                               th:if="${'admin'.equals(session.userRole)}">✏️ Update</a>
+                            <a th:href="@{/employees/projects(employeeId=${employee.id})}"
+                               class="btn btn-sm btn-link">📁 Projects</a>
+                            <form th:if="${'admin'.equals(session.userRole)}" th:action="@{/employees/delete}" method="post"
+                                  class="inline-form">
+                                <input type="hidden" name="id" th:value="${employee.id}">
+                                <button type="submit" class="btn btn-sm btn-link btn-link-danger">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

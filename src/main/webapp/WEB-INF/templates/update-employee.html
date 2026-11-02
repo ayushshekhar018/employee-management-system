@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Employee</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/employees}" class="nav-link">Employees</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <a th:href="@{/employees}">Employees</a>
+        <span class="separator">›</span>
+        <span>Edit</span>
+    </div>
+
+    <div class="page-header">
+        <h1>✏️ Update Employee</h1>
+        <p class="page-subtitle">Editing employee <strong th:text="'#' + ${employee.id}"></strong></p>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${error}" class="alert alert-error card-narrow mb-2">
+        <strong>❌ Error:</strong> <span th:text="${error}"></span>
+    </div>
+
+    <div class="card card-narrow">
+        <form method="post" th:action="@{/employees/update}" th:object="${employee}">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="form-group">
+                <label for="name">Employee Name</label>
+                <input id="name" type="text" th:field="*{name}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dept">Department</label>
+                <input id="dept" type="text" th:field="*{dept}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="salary">Salary</label>
+                <input id="salary" type="number" th:field="*{salary}" step="0.01" min="0" required>
+            </div>
+
+            <fieldset class="form-fieldset">
+                <legend>Change Password (optional)</legend>
+                <p class="form-hint">Leave blank to keep the current password. Minimum 6 characters.</p>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input id="newPassword" name="newPassword" type="password" minlength="6" placeholder="Enter new password">
+                </div>
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                <a th:href="@{/employees}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

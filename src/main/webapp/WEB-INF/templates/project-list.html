@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project List</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <span>Projects</span>
+    </div>
+
+    <div class="page-header page-header-split">
+        <div>
+            <h1>Project List</h1>
+            <p class="page-subtitle">View and manage all projects</p>
+        </div>
+        <div th:if="${'admin'.equals(session.userRole)}">
+            <a th:href="@{/projects/save}" class="btn btn-primary">+ Add Project</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>Budget</th>
+                    <th>Team Size</th>
+                    <th>Status</th>
+                    <th>Allocated</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}"></td>
+                    <td><strong th:text="${project.projectName}"></strong></td>
+                    <td th:text="${project.clientName}"></td>
+                    <td th:text="${project.startDate != null} ? ${#temporals.format(project.startDate, 'yyyy-MM-dd')} : '-'"></td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(project.budget, 1, 2)}"></td>
+                    <td th:text="${project.maximumTeamSize}"></td>
+                    <td>
+                        <span th:class="${'active'.equals(project.status)} ? 'badge badge-active' : (${'planned'.equals(project.status)} ? 'badge badge-planned' : 'badge badge-completed')"
+                              th:text="${#strings.toUpperCase(project.status)}"></span>
+                    </td>
+                    <td>
+                        <span th:text="${allocatedCounts[project.id]} + ' / ' + ${project.maximumTeamSize}"></span>
+                        <span th:if="${!'completed'.equals(project.status) && allocatedCounts[project.id] >= project.maximumTeamSize}" class="badge badge-full">Full</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a th:href="@{/projects/update(id=${project.id})}"
+                               class="btn btn-sm btn-outline"
+                               th:if="${'admin'.equals(session.userRole)}">✏️ Update</a>
+                            <a th:href="@{/projects/employees(projectId=${project.id})}"
+                               class="btn btn-sm btn-link">👥 Team</a>
+                            <a th:href="@{/allocate}"
+                               class="btn btn-sm btn-link"
+                               th:if="${'admin'.equals(session.userRole)}">🔗 Allocate</a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

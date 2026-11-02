@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole != null} ? ${session.userRole} : 'employee'">employee</span>
+        </div>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h2>Welcome back, <span th:text="${session.userName}">User</span>! 👋</h2>
+        <p>Manage teams, projects, task delivery, and allocations from your dashboard.</p>
+        <div class="user-details">
+            <div class="user-detail-item">
+                <div>
+                    <div class="detail-label">Role</div>
+                    <div class="detail-value" th:text="${session.userRole != null} ? ${session.userRole} : 'employee'">employee</div>
+                </div>
+            </div>
+            <div class="user-detail-item">
+                <div>
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value" th:text="${session.userEmail}">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Error -->
+    <div th:if="${session.authError != null}" class="alert alert-error">
+        <span class="alert-icon">⚠️</span>
+        <span th:text="${session.authError}"></span>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="page-header">
+        <h1>Quick Actions</h1>
+        <p class="page-subtitle">Choose an action to get started</p>
+    </div>
+
+    <div class="nav-cards">
+        <a th:if="${'admin'.equals(session.userRole)}" th:href="@{/employees}" class="nav-card">
+            <div class="nav-card-icon">👥</div>
+            <h3>Employee Directory</h3>
+            <p>View, add, update, and delete employees</p>
+        </a>
+
+        <a th:if="${'admin'.equals(session.userRole)}" th:href="@{/projects}" class="nav-card">
+            <div class="nav-card-icon">📋</div>
+            <h3>Project Management</h3>
+            <p>View, add, and update projects</p>
+        </a>
+
+        <a th:if="${'admin'.equals(session.userRole)}" th:href="@{/allocate}" class="nav-card">
+            <div class="nav-card-icon">🔗</div>
+            <h3>Allocate Employees</h3>
+            <p>Assign employees to one or more projects</p>
+        </a>
+
+        <a th:href="@{/tasks}" class="nav-card">
+            <div class="nav-card-icon">✅</div>
+            <h3>Task Board</h3>
+            <p>Track deadlines, priorities, and work in progress</p>
+        </a>
+
+        <a th:href="@{/my-projects}" class="nav-card">
+            <div class="nav-card-icon">📁</div>
+            <h3>My Projects</h3>
+            <p>View your allocated projects</p>
+        </a>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

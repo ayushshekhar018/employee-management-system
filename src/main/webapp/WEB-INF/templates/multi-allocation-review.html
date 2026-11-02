@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Allocation</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <a th:href="@{/allocate}">Allocate</a>
+        <span class="separator">›</span>
+        <span>Review</span>
+    </div>
+
+    <div class="page-header">
+        <h1>📋 Review Allocation</h1>
+        <p class="page-subtitle">Please review the details below before confirming</p>
+    </div>
+
+    <div th:if="${warnings != null && !warnings.isEmpty()}" class="alert alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <div>
+            <strong>Warnings:</strong>
+            <ul class="warning-list">
+                <li th:each="warn : ${warnings}" th:text="${warn}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Employee Info -->
+    <div class="card">
+        <div class="card-header">
+            <h3>👤 Employee: <span th:text="${employee.name}"></span></h3>
+        </div>
+        <div class="detail-list">
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value" th:text="${employee.email}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Designation</span>
+                <span class="detail-value" th:text="${employee.designation}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Department</span>
+                <span class="detail-value" th:text="${employee.dept}"></span>
+            </div>
+        </div>
+        <p class="text-muted">Allocating to <strong th:text="${#lists.size(allocationDetails)}"></strong> project(s).</p>
+    </div>
+
+    <!-- Allocation Details Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📋 Project Allocation Details</h3>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Project ID</th>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Team Capacity</th>
+                    <th>Allocation Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="detail : ${allocationDetails}">
+                    <td th:text="${detail.projectId}"></td>
+                    <td><strong th:text="${detail.project.projectName}"></strong></td>
+                    <td th:text="${detail.project.clientName}"></td>
+                    <td>
+                        <span th:class="${'active'.equals(detail.project.status)} ? 'badge badge-active' : (${'planned'.equals(detail.project.status)} ? 'badge badge-planned' : 'badge badge-completed')"
+                              th:text="${#strings.toUpperCase(detail.project.status)}"></span>
+                    </td>
+                    <td>
+                        <span th:text="${detail.project.employees != null} ? ${#sets.size(detail.project.employees)} : 0"></span>
+                        / <span th:text="${detail.project.maximumTeamSize}"></span>
+                    </td>
+                    <td>
+                        <span th:if="${detail.issue != null}" class="badge badge-error" th:text="${detail.issue}"></span>
+                        <span th:if="${detail.issue == null}" class="badge badge-success">✓ OK</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+        <form method="post" th:action="@{/allocate/confirm}" class="inline-form">
+            <button type="submit" class="btn btn-success">✅ Confirm Allocation</button>
+        </form>
+        <a th:href="@{/allocate}" class="btn btn-outline">✏️ Modify Selection</a>
+        <a th:href="@{/dashboard}" class="btn btn-outline">Cancel</a>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

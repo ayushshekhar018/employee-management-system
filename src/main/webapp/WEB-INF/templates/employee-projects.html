@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Projects</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <span th:if="${isOwnProfile == true}">My Projects</span>
+        <span th:if="${isOwnProfile != true}">Employee Projects</span>
+    </div>
+
+    <div class="page-header">
+        <h1>📁 Employee Projects</h1>
+        <p class="page-subtitle">
+            <a th:if="${isOwnProfile == true}" th:href="@{/dashboard}">← Back to Dashboard</a>
+            <a th:if="${isOwnProfile != true}" th:href="@{/employees}">← Back to Employees</a>
+        </p>
+    </div>
+
+    <!-- Employee Info Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 th:text="${employee.name}"></h2>
+        </div>
+        <div class="detail-list">
+            <div class="detail-item">
+                <span class="detail-label">Department</span>
+                <span class="detail-value" th:text="${employee.dept}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Designation</span>
+                <span class="detail-value" th:text="${employee.designation}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value" th:text="${employee.email}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Allocated Projects</h3>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>Budget</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(projects)}">
+                    <td colspan="7" class="empty-cell">No projects allocated to this employee yet.</td>
+                </tr>
+                <tr th:each="project : ${projects}">
+                    <td th:text="${project.id}"></td>
+                    <td><strong th:text="${project.projectName}"></strong></td>
+                    <td th:text="${project.clientName}"></td>
+                    <td th:text="${project.startDate != null} ? ${#temporals.format(project.startDate, 'yyyy-MM-dd')} : '-'"></td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(project.budget, 1, 2)}"></td>
+                    <td>
+                        <span th:class="${'active'.equals(project.status)} ? 'badge badge-active' : (${'planned'.equals(project.status)} ? 'badge badge-planned' : 'badge badge-completed')"
+                              th:text="${#strings.toUpperCase(project.status)}"></span>
+                    </td>
+                    <td>
+                        <a th:href="@{/projects/employees(projectId=${project.id})}" class="btn btn-sm btn-link">👥 View Team</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2027 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/employees}" class="nav-link">Employees</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <a th:href="@{/employees}">Employees</a>
+        <span class="separator">›</span>
+        <span>Add New</span>
+    </div>
+
+    <div class="page-header">
+        <h1>👤 Add New Employee</h1>
+        <p class="page-subtitle">Fill in the details to create a new employee account</p>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${error}" class="alert alert-error card-narrow mb-2">
+        <strong>❌ Error:</strong> <span th:text="${error}"></span>
+    </div>
+
+    <div class="card card-narrow">
+        <form method="post" th:action="@{/employees/save}" th:object="${employee}">
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="name">Employee Name</label>
+                    <input id="name" type="text" th:field="*{name}" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Employee Email</label>
+                    <input id="email" type="email" th:field="*{email}" placeholder="email@example.com">
+                </div>
+            </div>
+
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="designation">Designation</label>
+                    <input id="designation" type="text" th:field="*{designation}" placeholder="e.g. Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label for="dept">Department</label>
+                    <input id="dept" type="text" th:field="*{dept}" placeholder="e.g. Engineering" required>
+                </div>
+            </div>
+
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="salary">Salary</label>
+                    <input id="salary" type="number" th:field="*{salary}" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" th:field="*{password}" placeholder="Min 6 characters" minlength="6">
+                    <p class="form-hint">Password will be securely hashed using BCrypt.</p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" th:field="*{role}">
+                    <option value="">-- Select Role --</option>
+                    <option value="admin">Admin</option>
+                    <option value="employee">Employee</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Add Employee</button>
+                <a th:href="@{/employees}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>

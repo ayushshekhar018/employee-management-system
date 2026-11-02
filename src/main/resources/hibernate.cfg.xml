@@ -1,0 +1,36 @@
+<!--
+  Hibernate Configuration — Production (MySQL)
+
+  IMPORTANT: Set hibernate.connection.password to your actual MySQL root password
+  before running the application.  Leaving it empty will cause a login failure.
+
+  For production deployment consider:
+  - Using environment variables or a secrets manager instead of plain-text credentials
+  - Replacing hbm2ddl.auto=update with "validate" to prevent uncontrolled schema changes
+  - Adding a production-grade connection pool (HikariCP / Agroal) instead of the
+    built-in non-pooled driver manager
+-->
+<hibernate-configuration>
+    <session-factory>
+        <!-- Database connection -->
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/employeedb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password"></property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+        <!-- SQL logging (disable for production) -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- Dialect — Hibernate 7 auto-detects MySQL version; version-specific dialects (MySQL8Dialect) were removed -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!-- Schema management — "update" for development; use "validate" in production -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Entity mappings -->
+        <mapping class="com.employeemanagement.model.Employee"/>
+        <mapping class="com.employeemanagement.model.Project"/>
+        <mapping class="com.employeemanagement.model.Task"/>
+    </session-factory>
+</hibernate-configuration>

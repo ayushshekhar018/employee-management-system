@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocate Employee to Projects</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<!-- Top Navigation -->
+<nav class="top-nav">
+    <a th:href="@{/dashboard}" class="nav-brand">
+        <span class="brand-icon">🏢</span>
+        <span>EMS</span>
+    </a>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="user-avatar" th:text="${#strings.substring(session.userName, 0, 1)}">U</div>
+            <span th:text="${session.userName}">User</span>
+            <span class="user-role" th:text="${session.userRole}">role</span>
+        </div>
+        <a th:href="@{/dashboard}" class="nav-link">Dashboard</a>
+        <a th:href="@{/logout}" class="nav-link logout-link">Logout</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+    <div class="breadcrumb">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <span class="separator">›</span>
+        <span>Multi-Project Allocation</span>
+    </div>
+
+    <div class="page-header">
+        <h1>🔗 Allocate Employee to Projects</h1>
+        <p class="page-subtitle">Select an employee and one or more projects to allocate</p>
+    </div>
+
+    <div th:if="${error != null}" class="alert alert-error">
+        <span class="alert-icon">⚠️</span>
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="card card-wide">
+        <form method="post" th:action="@{/allocate/review}">
+            <div class="form-group">
+                <label for="employeeId">Select Employee</label>
+                <select id="employeeId" name="employeeId" required>
+                    <option value="">-- Select an Employee --</option>
+                    <option th:each="emp : ${allEmployees}"
+                            th:value="${emp.id}"
+                            th:text="${emp.name} + ' (' + ${emp.email} + ')'">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="projectIds">Select Projects (hold Ctrl/Cmd to select multiple)</label>
+                <select id="projectIds" name="projectIds" multiple required>
+                    <option th:each="proj : ${allProjects}"
+                            th:value="${proj.id}"
+                            th:text="${proj.projectName}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">📋 Review Allocation</button>
+                <a th:href="@{/dashboard}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Project Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📋 Available Projects</h3>
+        </div>
+        <ul class="project-list">
+            <li th:each="proj : ${allProjects}">
+                <span class="project-name" th:text="${proj.projectName}"></span>
+                <span class="project-meta">
+                    — Client: <span th:text="${proj.clientName}"></span>
+                    | Status:
+                    <span th:class="${'active'.equals(proj.status)} ? 'badge badge-active' : (${'planned'.equals(proj.status)} ? 'badge badge-planned' : 'badge badge-completed')"
+                          th:text="${#strings.toUpperCase(proj.status)}"></span>
+                    | Team: <span th:text="${allocatedCounts[proj.id] != null} ? ${allocatedCounts[proj.id]} : 0"></span> / <span th:text="${proj.maximumTeamSize}"></span>
+                </span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 Employee Management System. All rights reserved.</p>
+</footer>
+</body>
+</html>
