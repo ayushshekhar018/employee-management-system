@@ -45,7 +45,10 @@
                             th:field="*{password}"
                             placeholder="Enter your password"
                             autocomplete="current-password"
+                            pattern="\\S+"
+                            title="Spaces inside passwords are not allowed."
                             required>
+                    <p class="form-hint">Leading and trailing spaces are removed. Spaces within a password are not allowed.</p>
                     <button
                             type="button"
                             id="togglePassword"
@@ -70,6 +73,26 @@
             return;
         }
 
+        // Remove accidental leading/trailing whitespace as the user types or pastes.
+        // The HTML pattern and server-side validator reject whitespace inside the password.
+        const outerWhitespace = /^[\\s\\u200B\\uFEFF]+|[\\s\\u200B\\uFEFF]+$/gu;
+        const leadingWhitespace = /^[\\s\\u200B\\uFEFF]+/u;
+
+        passwordInput.addEventListener("input", () => {
+            const originalValue = passwordInput.value;
+            const normalizedValue = originalValue.replace(outerWhitespace, "");
+
+            if (normalizedValue !== originalValue) {
+                const cursorPosition = passwordInput.selectionStart ?? originalValue.length;
+                const removedLeadingLength = originalValue.match(leadingWhitespace)?.[0].length ?? 0;
+
+                passwordInput.value = normalizedValue;
+                const nextCursorPosition = Math.max(0, cursorPosition - removedLeadingLength);
+                passwordInput.setSelectionRange(nextCursorPosition, nextCursorPosition);
+            }
+        });
+
+        // This only changes visibility; it never changes the password value.
         toggleButton.addEventListener("click", () => {
             const shouldShowPassword = passwordInput.type === "password";
 
