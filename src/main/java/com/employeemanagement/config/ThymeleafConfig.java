@@ -18,6 +18,9 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
 import java.io.IOException;
 import java.util.Map;
+/**
+ * Initializes the shared Thymeleaf renderer and Hibernate resources for the web application.
+ */
 @WebListener
 public class ThymeleafConfig implements ServletContextListener {
 
@@ -27,6 +30,7 @@ public class ThymeleafConfig implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
+        // Adapt the ServletContext to Thymeleaf's Jakarta Servlet integration.
         application = JakartaServletWebApplication.buildApplication(
                 sce.getServletContext()
         );
@@ -40,11 +44,13 @@ public class ThymeleafConfig implements ServletContextListener {
         templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(resolver);
 
+        // Initialize Hibernate once when the web application starts.
         HibernateUtil.getSessionFactory();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        // Release the shared SessionFactory when the application is stopped.
         HibernateUtil.shutdown();
     }
 
@@ -55,6 +61,7 @@ public class ThymeleafConfig implements ServletContextListener {
             String templateName
     ) throws IOException {
 
+        // Create a request-scoped Thymeleaf context and expose controller-supplied model data.
         IWebExchange exchange = application.buildExchange(req, res);
 
         WebContext webContext = new WebContext(exchange);
@@ -74,6 +81,7 @@ public class ThymeleafConfig implements ServletContextListener {
             String templateName
     ) throws ServletException, IOException {
 
+        // Copy model values to request attributes for the forwarding servlet.
         for (Map.Entry<String, Object> entry : variables.entrySet()) {
             req.setAttribute(entry.getKey(), entry.getValue());
         }
