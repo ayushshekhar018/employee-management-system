@@ -35,6 +35,7 @@ public class Task {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Load related records on demand; task queries explicitly fetch them when needed.
+    // Related records are loaded on demand; task queries fetch them explicitly when needed.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
