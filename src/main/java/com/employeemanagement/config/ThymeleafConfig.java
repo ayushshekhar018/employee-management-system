@@ -19,7 +19,7 @@ import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import java.io.IOException;
 import java.util.Map;
 /**
- * Initializes the shared Thymeleaf renderer and Hibernate resources for the web application.
+ * Initializes the Thymeleaf renderer; Hibernate is initialized lazily on first data access.
  */
 @WebListener
 public class ThymeleafConfig implements ServletContextListener {
@@ -44,8 +44,11 @@ public class ThymeleafConfig implements ServletContextListener {
         templateEngine = new TemplateEngine();
         templateEngine.setTemplateResolver(resolver);
 
-        // Initialize Hibernate once when the web application starts.
-        HibernateUtil.getSessionFactory();
+        // Keep web startup independent of database availability.
+        // HibernateUtil creates the SessionFactory lazily on the first DAO operation.
+        // This allows the login page and Render health check to start even if the
+        // external database is temporarily unreachable; database errors still surface
+        // when a database-backed action is attempted.
     }
 
     @Override
