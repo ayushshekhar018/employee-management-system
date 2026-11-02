@@ -14,6 +14,9 @@ import java.util.Map;
 /**
  * Data access operations for projects and their many-to-many employee allocations.
  */
+/**
+ * Data access operations for projects and their employee allocations.
+ */
 public class ProjectDAO {
 
     public List<Project> findAll() {
@@ -168,6 +171,7 @@ public class ProjectDAO {
                 }
 
                 // Enforce the configured team capacity before modifying either side of the relationship.
+                // Enforce team capacity before changing either side of the association.
                 if (project.getEmployees().size() >= project.getMaximumTeamSize()) {
                     transaction.rollback();
                     return false;
