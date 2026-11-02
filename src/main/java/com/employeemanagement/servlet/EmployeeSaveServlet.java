@@ -44,7 +44,6 @@ public class EmployeeSaveServlet extends HttpServlet {
         String plainPassword = req.getParameter("password");
         String role = req.getParameter("role");
 
-        // Validate password
         if (plainPassword == null || plainPassword.isEmpty()) {
             renderFormError(req, res, "Password is required");
             return;
@@ -61,19 +60,17 @@ public class EmployeeSaveServlet extends HttpServlet {
         Employee employee = new Employee(dept, salary, name);
         employee.setEmail(email);
         employee.setDesignation(designation);
+        employee.setRole(role);
 
-        // Persist only a BCrypt hash; never store the submitted password as plain text.
+        // Only the published demo email with the employee role bypasses BCrypt.
         try {
-            employee.setPassword(PasswordUtil.hash(plainPassword));
+            employee.setPassword(PasswordUtil.hashForAccount(email, role, plainPassword));
         } catch (IllegalArgumentException e) {
             renderFormError(req, res, e.getMessage());
             return;
         }
 
-        employee.setRole(role);
-
         employeeDao.save(employee);
-
         res.sendRedirect(req.getContextPath() + "/employees");
     }
 }
