@@ -98,7 +98,7 @@
                               th:text="${#strings.toUpperCase(detail.project.status)}"></span>
                     </td>
                     <td>
-                        <span th:text="${detail.project.employees != null} ? ${#sets.size(detail.project.employees)} : 0"></span>
+                        <span th:text="${detail.allocatedCount}">0</span>
                         / <span th:text="${detail.project.maximumTeamSize}"></span>
                     </td>
                     <td>
