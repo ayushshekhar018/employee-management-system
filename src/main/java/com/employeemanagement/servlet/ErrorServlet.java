@@ -37,17 +37,13 @@ public class ErrorServlet extends HttpServlet {
         if (statusCode == null) {
             statusCode = 500;
         }
-        if (errorMessage == null || errorMessage.isEmpty()) {
-            switch (statusCode) {
-                case 404:
-                    errorMessage = "The requested page was not found.";
-                    break;
-                case 500:
-                    errorMessage = "An internal server error occurred.";
-                    break;
-                default:
-                    errorMessage = "An unexpected error occurred.";
-            }
+        // Do not expose internal exception messages or database details in a public error page.
+        if (statusCode == 404) {
+            errorMessage = "The requested page was not found.";
+        } else if (statusCode >= 500) {
+            errorMessage = "An internal server error occurred. Please try again later.";
+        } else if (errorMessage == null || errorMessage.isBlank()) {
+            errorMessage = "An unexpected error occurred.";
         }
 
         Map<String, Object> variables = new HashMap<>();
