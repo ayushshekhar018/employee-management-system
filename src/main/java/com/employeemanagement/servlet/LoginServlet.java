@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Authenticates credentials and establishes the user's HTTP session. */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
@@ -37,6 +38,7 @@ public class LoginServlet extends HttpServlet {
         Employee employee = userDAO.authenticate(email, password);
 
         if (employee != null) {
+            // Store the identity and role attributes used by subsequent request authorization.
             HttpSession session = req.getSession(true);
             session.setAttribute("userId", employee.getId());
             session.setAttribute("userName", employee.getName());
