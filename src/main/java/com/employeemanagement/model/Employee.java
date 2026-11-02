@@ -11,6 +11,9 @@ import java.util.Set;
 /**
  * Hibernate entity representing an employee account and project memberships.
  */
+/**
+ * Hibernate entity representing an employee account and project memberships.
+ */
 @Entity
 @Table(name="employeeinfo")
 public class Employee {
