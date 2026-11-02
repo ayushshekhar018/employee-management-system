@@ -35,7 +35,11 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
+        req.setCharacterEncoding("UTF-8");
+
+        // Normalize surrounding whitespace in the email, but never modify the password.
         String email = req.getParameter("email");
+        email = email == null ? null : email.trim();
         String password = req.getParameter("password");
 
         if (email == null || email.isBlank() || password == null || password.isEmpty()) {
@@ -44,7 +48,7 @@ public class LoginServlet extends HttpServlet {
         }
 
         try {
-            Employee employee = userDAO.authenticate(email.trim(), password);
+            Employee employee = userDAO.authenticate(email, password);
 
             if (employee == null) {
                 renderLoginError(req, res, email, "Invalid email or password. Please try again.");
