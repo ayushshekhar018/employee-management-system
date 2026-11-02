@@ -125,7 +125,7 @@ Update the connection properties to match your MySQL installation:
 <property name="hibernate.connection.password">YOUR_MYSQL_PASSWORD</property>
 ```
 
-**Important:** The checked-in configuration currently has an empty password and uses the MySQL `root` user. Set credentials appropriate for your local environment. Do not commit real production credentials to GitHub. For production, load secrets from environment variables or a secrets manager and use a dedicated database user with limited privileges.
+**Important:** The checked-in configuration currently has an empty password and uses the MySQL `root` user. Set credentials appropriate for your local environment. Do not commit real production credentials to GitHub. The current configuration uses literal values from this XML file; merely adding environment variables in a hosting dashboard will not override them. Before production deployment, update the Hibernate configuration/bootstrap code to read the database URL, username, and password from environment variables or a secrets manager, and use a dedicated database user with limited privileges.
 
 The current setting `hibernate.hbm2ddl.auto=update` is intended for development. Review the schema-management strategy before production deployment; do not assume it is a substitute for database migrations or backups.
 
