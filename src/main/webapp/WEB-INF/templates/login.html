@@ -92,8 +92,10 @@
             }
         });
 
-        // This only changes visibility; it never changes the password value.
+        // Normalize again on toggle because browser autofill may not fire an input event.
+        // Changing visibility itself never inserts characters into the password.
         toggleButton.addEventListener("click", () => {
+            passwordInput.value = passwordInput.value.replace(outerWhitespace, "");
             const shouldShowPassword = passwordInput.type === "password";
 
             passwordInput.type = shouldShowPassword ? "text" : "password";
