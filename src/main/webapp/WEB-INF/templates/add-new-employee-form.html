@@ -54,7 +54,7 @@
                 </div>
                 <div class="form-group">
                     <label for="email">Employee Email</label>
-                    <input id="email" type="email" th:field="*{email}" placeholder="email@example.com">
+                    <input id="email" type="email" th:field="*{email}" placeholder="email@example.com" required>
                 </div>
             </div>
 
@@ -77,13 +77,13 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input id="password" type="password" th:field="*{password}" placeholder="Min 6 characters" minlength="6">
-                    <p class="form-hint">Password will be securely hashed using BCrypt.</p>
+                    <p class="form-hint">Passwords use BCrypt by default. Only the published demo account has a plain-text exception.</p>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="role">Role</label>
-                <select id="role" th:field="*{role}">
+                <select id="role" th:field="*{role}" required>
                     <option value="">-- Select Role --</option>
                     <option value="admin">Admin</option>
                     <option value="employee">Employee</option>
