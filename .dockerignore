@@ -1,0 +1,11 @@
+# Git and IDE metadata
+.git
+.idea
+*.iml
+.smarttomcat
+
+# Maven output is created in the image build
+target
+
+# OS metadata
+.DS_Store
