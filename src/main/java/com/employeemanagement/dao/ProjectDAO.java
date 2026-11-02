@@ -167,8 +167,7 @@ public class ProjectDAO {
                     return false;
                 }
 
-                // Enforce the configured team capacity before modifying either side of the relationship.
-                // Enforce team capacity before changing either side of the association.
+                // Check team capacity before changing either side of the employee-project association.
                 if (project.getEmployees().size() >= project.getMaximumTeamSize()) {
                     transaction.rollback();
                     return false;
