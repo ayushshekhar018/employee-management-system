@@ -18,6 +18,9 @@ import java.util.List;
 /**
  * Applies route-level authentication and administrator access checks.
  */
+/**
+ * Applies route-level authentication and administrator access checks.
+ */
 @WebFilter(filterName = "2_AuthenticationFilter", urlPatterns = "/*")
 public class AuthenticationFilter implements Filter {
 
