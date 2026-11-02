@@ -49,7 +49,10 @@ class TaskDAOTest extends BaseDAOTest {
 
         List<Task> tasks = dao.findAll();
         assertFalse(tasks.isEmpty());
-        Task task = tasks.get(0);
+        Task task = tasks.stream()
+                .filter(t -> "Review code".equals(t.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Review code task not found."));
         assertEquals("Review code", task.getTitle());
         assertNull(task.getAssignee());
     }
@@ -72,7 +75,11 @@ class TaskDAOTest extends BaseDAOTest {
     void updateStatus_administratorCanUpdate() {
         dao.create("Status task", "Test status", "medium", null, project.getId(), employee.getId());
         List<Task> tasks = dao.findAll();
-        long taskId = tasks.get(0).getId();
+        long taskId = tasks.stream()
+                .filter(task -> "Status task".equals(task.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Status task not found."))
+                .getId();
 
         assertTrue(dao.updateStatus(taskId, "done", employee.getId(), true));
     }
@@ -81,9 +88,13 @@ class TaskDAOTest extends BaseDAOTest {
     void updateStatus_assigneeCanUpdate() {
         dao.create("Assignee task", "Test assignee update", "medium", null, project.getId(), employee.getId());
         List<Task> tasks = dao.findAll();
-        long taskId = tasks.get(0).getId();
+        long taskId = tasks.stream()
+                .filter(task -> "Assignee task".equals(task.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Assignee task not found."))
+                .getId();
 
-        assertTrue(dao.updateStatus(taskId, "in_progress", employee.getId(), false));
+        assertTrue(dao.updateStatus(taskId, "in progress", employee.getId(), false));
     }
 
     @Test
@@ -93,7 +104,11 @@ class TaskDAOTest extends BaseDAOTest {
 
         dao.create("Other task", "Test non-assignee", "medium", null, project.getId(), employee.getId());
         List<Task> tasks = dao.findAll();
-        long taskId = tasks.get(0).getId();
+        long taskId = tasks.stream()
+                .filter(task -> "Other task".equals(task.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Other task not found."))
+                .getId();
 
         assertFalse(dao.updateStatus(taskId, "done", other.getId(), false));
     }
@@ -107,7 +122,11 @@ class TaskDAOTest extends BaseDAOTest {
     void delete_existingTask() {
         dao.create("Delete me", "Will be deleted", "low", null, project.getId(), null);
         List<Task> tasks = dao.findAll();
-        long taskId = tasks.get(0).getId();
+        long taskId = tasks.stream()
+                .filter(task -> "Delete me".equals(task.getTitle()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Delete me task not found."))
+                .getId();
 
         assertTrue(dao.delete(taskId));
     }
