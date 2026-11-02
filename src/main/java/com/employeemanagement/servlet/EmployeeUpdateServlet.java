@@ -13,6 +13,7 @@ import java.util.Map;
 
 import java.io.IOException;
 
+/** Loads and updates an existing employee record. */
 @WebServlet("/employees/update")
 public class EmployeeUpdateServlet extends HttpServlet {
 
@@ -119,7 +120,7 @@ public class EmployeeUpdateServlet extends HttpServlet {
         employee.setDept(dept);
         employee.setSalary(salary);
 
-        // Update password only if a new password is provided
+        // An empty password field means the existing password should remain unchanged.
         if (newPassword != null && !newPassword.isEmpty()) {
             try {
                 employee.setPassword(PasswordUtil.hash(newPassword));
