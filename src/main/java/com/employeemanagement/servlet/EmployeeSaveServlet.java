@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Handles employee creation submitted from the employee form. */
 @WebServlet("/employees/save")
 public class EmployeeSaveServlet extends HttpServlet {
 
@@ -61,6 +62,7 @@ public class EmployeeSaveServlet extends HttpServlet {
         employee.setEmail(email);
         employee.setDesignation(designation);
 
+        // Persist only a BCrypt hash; never store the submitted password as plain text.
         try {
             employee.setPassword(PasswordUtil.hash(plainPassword));
         } catch (IllegalArgumentException e) {
