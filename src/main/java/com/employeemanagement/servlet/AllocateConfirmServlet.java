@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.util.*;
 
 @WebServlet("/allocate/confirm")
+/**
+ * Completes a reviewed multi-project allocation using the selection stored in the HTTP session.
+ */
 public class AllocateConfirmServlet extends HttpServlet {
 
     private final EmployeeDAO employeeDao = new EmployeeDAO();
@@ -26,6 +29,7 @@ public class AllocateConfirmServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
+        // Reuse the existing session; confirmation must use the selection the user reviewed.
         HttpSession session = req.getSession(false);
         if (session == null) {
             res.sendRedirect(req.getContextPath() + "/login");
@@ -51,6 +55,7 @@ public class AllocateConfirmServlet extends HttpServlet {
             return;
         }
 
+        // The DAO validates each project and commits the eligible allocations.
         Map<Long, String> errors = projectDao.batchAllocateEmployee(employeeId, projectIds);
 
         session.removeAttribute("allocEmployeeId");
@@ -60,6 +65,7 @@ public class AllocateConfirmServlet extends HttpServlet {
         int successCount = 0;
         int failCount = 0;
 
+        // Keep one result entry for every requested project, including rejected allocations.
         for (Long projectId : projectIds) {
             Map<String, Object> detail = new HashMap<>();
             Project project = projectDao.findById(projectId);
