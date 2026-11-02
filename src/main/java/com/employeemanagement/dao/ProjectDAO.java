@@ -10,11 +10,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Data access operations for projects and their employee allocations.
  */
 public class ProjectDAO {
+
+    private static final Set<String> VALID_STATUSES = Set.of("planned", "active", "completed");
+
+    private void validateProject(Project project) {
+        if (project == null) {
+            throw new IllegalArgumentException("Project is required.");
+        }
+        if (project.getProjectName() == null || project.getProjectName().isBlank()
+                || project.getProjectName().trim().length() > 150) {
+            throw new IllegalArgumentException("Project name is required and must be at most 150 characters.");
+        }
+        if (project.getClientName() != null && project.getClientName().length() > 150) {
+            throw new IllegalArgumentException("Client name must be at most 150 characters.");
+        }
+        if (!Double.isFinite(project.getBudget()) || project.getBudget() < 0) {
+            throw new IllegalArgumentException("Project budget must be a finite, non-negative number.");
+        }
+        if (project.getMaximumTeamSize() < 0) {
+            throw new IllegalArgumentException("Maximum team size cannot be negative.");
+        }
+        String status = project.getStatus();
+        if (status == null || !VALID_STATUSES.contains(status.trim().toLowerCase(Locale.ROOT))) {
+            throw new IllegalArgumentException("Choose a valid project status.");
+        }
+        project.setProjectName(project.getProjectName().trim());
+        project.setStatus(status.trim().toLowerCase(Locale.ROOT));
+    }
 
     public List<Project> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -34,6 +63,7 @@ public class ProjectDAO {
 
     public void save(Project project) {
         if (project == null) return;
+        validateProject(project);
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
@@ -49,6 +79,7 @@ public class ProjectDAO {
 
     public void update(Project project) {
         if (project == null) return;
+        validateProject(project);
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
@@ -84,11 +115,24 @@ public class ProjectDAO {
                     return;
                 }
 
+                Long taskCount = session.createQuery(
+                        "select count(t.id) from Task t where t.project.id = :projectId",
+                        Long.class
+                ).setParameter("projectId", id).getSingleResult();
+                if (taskCount > 0) {
+                    throw new IllegalStateException(
+                            "This project still has tasks. Remove or reassign its tasks before deleting the project."
+                    );
+                }
+
                 // Clear the join-table relationship before deleting the project.
                 project.getEmployees().clear();
 
                 session.remove(project);
                 transaction.commit();
+            } catch (RuntimeException e) {
+                if (transaction.isActive()) transaction.rollback();
+                throw e;
             } catch (Exception e) {
                 if (transaction.isActive()) transaction.rollback();
                 throw new RuntimeException(e);
