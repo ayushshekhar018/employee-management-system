@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Data access operations for projects and their many-to-many employee allocations.
- */
-/**
  * Data access operations for projects and their employee allocations.
  */
 public class ProjectDAO {
