@@ -99,6 +99,39 @@ public class ProjectSaveServlet extends HttpServlet {
             return;
         }
 
+        if (!Double.isFinite(budget) || budget < 0) {
+            Project invalidProject = new Project(projectName, clientName, startDate, budget, maximumTeamSize, status);
+            ThymeleafConfig.render(req, res, Map.of(
+                    "project", invalidProject,
+                    "error", "Budget must be a finite, non-negative number."
+            ), "project-form");
+            return;
+        }
+        if (maximumTeamSize < 0) {
+            Project invalidProject = new Project(projectName, clientName, startDate, budget, maximumTeamSize, status);
+            ThymeleafConfig.render(req, res, Map.of(
+                    "project", invalidProject,
+                    "error", "Maximum team size cannot be negative."
+            ), "project-form");
+            return;
+        }
+        if (projectName.length() > 150 || (clientName != null && clientName.length() > 150)) {
+            Project invalidProject = new Project(projectName, clientName, startDate, budget, maximumTeamSize, status);
+            ThymeleafConfig.render(req, res, Map.of(
+                    "project", invalidProject,
+                    "error", "Project and client names must be at most 150 characters."
+            ), "project-form");
+            return;
+        }
+        if (!"planned".equals(status) && !"active".equals(status) && !"completed".equals(status)) {
+            Project invalidProject = new Project(projectName, clientName, startDate, budget, maximumTeamSize, status);
+            ThymeleafConfig.render(req, res, Map.of(
+                    "project", invalidProject,
+                    "error", "Choose a valid project status."
+            ), "project-form");
+            return;
+        }
+
         Project project = new Project(projectName, clientName, startDate, budget, maximumTeamSize, status);
         projectDao.save(project);
 
