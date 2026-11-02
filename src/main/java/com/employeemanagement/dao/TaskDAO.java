@@ -17,6 +17,7 @@ import java.util.List;
 public class TaskDAO {
     // Fetch the associated project and optional assignee while the session is open.
     // Fetch project and optional assignee while the Hibernate session is open.
+    // Fetch the project and optional assignee while the Hibernate session is open.
     private static final String TASK_GRAPH = "select t from Task t join fetch t.project left join fetch t.assignee ";
 
     public List<Task> findAll() {
@@ -63,6 +64,7 @@ public class TaskDAO {
                 Task task = session.find(Task.class, taskId);
                 // Employees may update only their own assigned tasks; administrators can update any task.
                 // Employees may update only their assigned tasks; administrators can update any task.
+                // Employees may update only assigned tasks; administrators can update any task.
                 if (task == null || (!administrator && (task.getAssignee() == null || task.getAssignee().getId() != employeeId))) {
                     tx.rollback(); return false;
                 }
