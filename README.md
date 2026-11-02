@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Database-TiDB%20%7C%20MySQL%20Compatible-DC382D?style=for-the-badge" alt="TiDB MySQL compatible">
 </p>
 
-A server-rendered Java web application for managing employees, projects, team allocations, and project tasks. The application uses Jakarta Servlets for request handling, Thymeleaf for server-side views, Hibernate ORM for persistence, and BCrypt for password hashing.
+A server-rendered Java web application for managing employees, projects, team allocations, and project tasks. The application uses Jakarta Servlets for request handling, Thymeleaf for server-side views, Hibernate ORM for persistence, and BCrypt password hashing for standard accounts. The published demo account is an explicitly scoped plain-text exception.
 
 **Live demo:** [employee-management-system-wavl.onrender.com/login](https://employee-management-system-wavl.onrender.com/login)  
 **Source code:** [github.com/ayushshekhar018/employee-management-system](https://github.com/ayushshekhar018/employee-management-system)
@@ -44,7 +44,7 @@ The Employee & Project Management System provides a single web interface for mai
 
 ### What it can do
 
-- **Authentication and roles** — session-based sign-in and sign-out, BCrypt password verification, and route-level access checks for authenticated users and administrators.
+- **Authentication and roles** — session-based sign-in and sign-out, BCrypt password verification for standard accounts, a narrowly scoped plain-text exception for the public demo account, and route-level access checks.
 - **Employee management** — create, view, edit, and delete employee records containing department, designation, email, salary, and role information.
 - **Project management** — maintain project details such as client, start date, budget, status, and maximum team size.
 - **Team allocation** — allocate employees to projects, review multi-project allocations before confirmation, and report project-specific successes or validation failures.
@@ -293,13 +293,15 @@ The live deployment has a public employee demo account documented in the [Demo l
 
 The deployment branch initializes Hibernate lazily on the first data-access operation. This keeps the login page and Render health check independent of database availability. Consequently, a successful `/login` health check confirms that the web application responds; it does **not** by itself confirm database authentication or CRUD functionality.
 
-The Hibernate configuration currently uses `hibernate.hbm2ddl.auto=update`, so mapped tables are created or updated when Hibernate first initializes successfully. The demo account's password is stored as a BCrypt hash. Keep administrator credentials private and never store a plain-text password in the password column.
+The Hibernate configuration currently uses `hibernate.hbm2ddl.auto=update`, so mapped tables are created or updated when Hibernate first initializes successfully. Standard employee passwords are stored as BCrypt hashes. The single public demo account (`demo.employee@example.com`, role `employee`) is intentionally stored and verified as plain text to simplify public evaluation; this exception is limited to that exact account identity. Keep administrator credentials private and never use the demo exception for real accounts or sensitive data.
 
 ---
 
 ## Security and production considerations
 
 Before using this application with real organizational data:
+
+- Store passwords as BCrypt hashes for all real accounts. The public demo account is the only intentional plain-text exception and must never be used for confidential or production data.
 
 - Keep database credentials in environment-backed secrets or a secrets manager.
 - Use a dedicated database account with only the privileges the application requires.
