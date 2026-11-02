@@ -72,6 +72,9 @@ public class AllocateReviewServlet extends HttpServlet {
             Map<String, Object> detail = new HashMap<>();
             detail.put("project", project);
             detail.put("projectId", projectId);
+            // Calculate this while the Hibernate session is open; the view must not
+            // traverse the detached Project.employees lazy collection.
+            detail.put("allocatedCount", projectDao.getAllocatedCount(projectId));
 
             String issue = null;
             if ("completed".equalsIgnoreCase(project.getStatus())) {
