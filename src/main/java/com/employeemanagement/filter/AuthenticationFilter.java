@@ -12,64 +12,30 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Applies route-level authentication and administrator access checks.
- */
-/**
- * Applies route-level authentication and administrator access checks.
+ * Applies authentication by default and restricts management routes to administrators.
  */
 @WebFilter(filterName = "2_AuthenticationFilter", urlPatterns = "/*")
 public class AuthenticationFilter implements Filter {
 
-    // These routes and static resources are available without an authenticated session.
-    // Routes and static resources that can be requested without a signed-in session.
-    private static final List<String> PUBLIC_URLS = Arrays.asList(
-            "/login",
-            "/logout",
-            "/css/",
-            "/js/",
-            "/images/",
-            "/assets/",
-            "/thymeleaf/",
-            "/error/"
+    private static final List<String> PUBLIC_EXACT_PATHS = List.of(
+            "/", "/login", "/logout", "/favicon.ico"
     );
 
-    // These routes require a signed-in user but are not restricted to administrators.
-    // Routes available to any authenticated account.
-    private static final List<String> AUTHENTICATED_PATTERNS = Arrays.asList(
-            "/dashboard",
-            "/my-projects",
-            "/employees/projects",
-            "/tasks",
-            "/tasks/status",
-            "/allocate/review",
-            "/allocate/result"
+    private static final List<String> PUBLIC_PATH_PREFIXES = List.of(
+            "/css/", "/js/", "/images/", "/assets/", "/error/"
     );
 
-    // These routes are reserved for accounts whose session role is admin.
-    // Routes reserved for users with the administrator role.
-    private static final List<String> ADMIN_PATTERNS = Arrays.asList(
-            "/employees",
-            "/employees/new",
-            "/employees/update",
-            "/employees/delete",
-            "/employees/save",
-            "/projects",
-            "/projects/save",
-            "/projects/update",
-            "/projects/allocate",
-            "/projects/employees",
-            "/tasks/save",
-            "/tasks/delete",
-            "/allocate",
-            "/allocate/confirm"
+    // All employee/project management and allocation routes are administrator-only.
+    private static final List<String> ADMIN_PATHS = List.of(
+            "/employees", "/projects", "/allocate", "/tasks/save", "/tasks/delete"
     );
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // No filter-specific initialization is required.
     }
 
     @Override
@@ -78,36 +44,34 @@ public class AuthenticationFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-        String uri = httpRequest.getRequestURI();
         String contextPath = httpRequest.getContextPath();
+        String path = httpRequest.getRequestURI().substring(contextPath.length());
 
-        String path = uri.substring(contextPath.length());
-
-        // Public resources bypass session checks.
-        // Public resources bypass the session checks.
-        if (isPublicUrl(path)) {
+        if (isPublicPath(path)) {
+            if ("/".equals(path)) {
+                httpResponse.sendRedirect(contextPath + "/login");
+                return;
+            }
             chain.doFilter(request, response);
             return;
         }
 
-        if (isAuthenticatedUrl(path) || isAdminUrl(path)) {
-            HttpSession session = httpRequest.getSession(false);
+        // Protect every non-public route, including future servlet mappings.
+        HttpSession session = httpRequest.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            httpResponse.sendRedirect(contextPath + "/login");
+            return;
+        }
 
-            if (session == null || session.getAttribute("userId") == null) {
-                httpResponse.sendRedirect(contextPath + "/login");
+        if (isAdminPath(path)) {
+            Object role = session.getAttribute("userRole");
+            if (role == null || !"admin".equalsIgnoreCase(role.toString())) {
+                session.setAttribute(
+                        "authError",
+                        "You do not have permission to access this page. Admin access required."
+                );
+                httpResponse.sendRedirect(contextPath + "/dashboard");
                 return;
-            }
-
-            // Authentication alone is not sufficient for administrative operations.
-            // A signed-in session alone does not grant administrative access.
-            if (isAdminUrl(path)) {
-                String userRole = (String) session.getAttribute("userRole");
-                if (userRole == null || !"admin".equalsIgnoreCase(userRole)) {
-                    session.setAttribute("authError", "You do not have permission to access this page. Admin access required.");
-                    httpResponse.sendRedirect(contextPath + "/dashboard");
-                    return;
-                }
             }
         }
 
@@ -116,32 +80,18 @@ public class AuthenticationFilter implements Filter {
 
     @Override
     public void destroy() {
+        // No resources to release.
     }
 
-    private boolean isPublicUrl(String path) {
-        for (String publicUrl : PUBLIC_URLS) {
-            if (path.equals(publicUrl) || path.startsWith(publicUrl)) {
-                return true;
-            }
+    private boolean isPublicPath(String path) {
+        if (PUBLIC_EXACT_PATHS.contains(path)) {
+            return true;
         }
-        return false;
+        return PUBLIC_PATH_PREFIXES.stream().anyMatch(path::startsWith);
     }
 
-    private boolean isAuthenticatedUrl(String path) {
-        for (String pattern : AUTHENTICATED_PATTERNS) {
-            if (path.equals(pattern) || path.startsWith(pattern)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAdminUrl(String path) {
-        for (String pattern : ADMIN_PATTERNS) {
-            if (path.equals(pattern) || path.startsWith(pattern)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isAdminPath(String path) {
+        return ADMIN_PATHS.stream().anyMatch(pattern ->
+                path.equals(pattern) || path.startsWith(pattern + "/"));
     }
 }
