@@ -8,6 +8,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
@@ -41,6 +42,11 @@ public class RequestLoggingFilter implements Filter {
 
         try {
             chain.doFilter(request, response);
+        } catch (IOException | ServletException | RuntimeException exception) {
+            // Log the stack trace so a server-side 500 can be diagnosed from Render logs.
+            System.err.println("[RequestLogging] Request failed -> " + path);
+            exception.printStackTrace(System.err);
+            throw exception;
         } finally {
             // Log completion even if downstream request processing fails.
             long endTime = System.currentTimeMillis();
