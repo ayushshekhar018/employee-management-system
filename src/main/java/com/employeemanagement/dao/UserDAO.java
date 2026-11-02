@@ -11,6 +11,9 @@ import java.util.List;
 /**
  * Authentication and account lookup operations backed by Employee records.
  */
+/**
+ * Authentication and account lookup operations backed by Employee records.
+ */
 public class UserDAO {
 
     public Employee authenticate(String email, String password) {
