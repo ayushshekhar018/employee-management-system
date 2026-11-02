@@ -24,7 +24,7 @@ A web-based Employee Management System built with Java, Jakarta Servlets, Hibern
 | Build | Apache Maven |
 | Packaging | WAR |
 | Web layer | Jakarta Servlet API 6.1 |
-| Application server | Apache Tomcat (Servlet 6.1-compatible version) |
+| Application server | Apache Tomcat 11.x |
 | ORM | Hibernate ORM 7 |
 | Database | MySQL |
 | Template engine | Thymeleaf 3 |
@@ -77,8 +77,10 @@ Install the following before running the project locally:
 - JDK 17
 - Apache Maven 3.8+
 - MySQL Server 8.0+
-- Apache Tomcat with support for Jakarta Servlet 6.1
+- Apache Tomcat 11.x
 - IntelliJ IDEA (recommended, but any Java IDE can be used)
+
+Tomcat 11 is required because the project uses Jakarta Servlet API 6.1. Tomcat 11 requires Java 17 or later.
 
 Check your installations:
 
@@ -180,13 +182,13 @@ The project includes JUnit tests and an H2 test dependency. Tests should use the
 
 ### Recommended deployment architecture
 
-1. Deploy the **Java WAR** to a host that supports Java 17 and a compatible Tomcat/Servlet runtime.
+1. Deploy the **Java WAR** to a host that supports Java 17 and Apache Tomcat 11.
 2. Provision a **managed MySQL database** (or another reachable MySQL server).
 3. Configure the Java application's database URL, username, and password using environment variables or the hosting provider's secret configuration.
 4. Allow the application host to connect to the database securely. Do not use `localhost` for a remote database.
 5. Use Netlify only if you later separate a static frontend from the Java backend; configure that frontend to call the deployed backend API.
 
-Before choosing a hosting provider, verify its supported Java version, Tomcat/Servlet compatibility, WAR deployment method, persistent storage requirements, and database connectivity.
+Before choosing a hosting provider, verify its Java version, Tomcat 11/WAR deployment support, persistent storage requirements, and database connectivity.
 
 ## Security and Production Checklist
 
