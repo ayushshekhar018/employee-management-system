@@ -23,6 +23,12 @@ public class DashboardServlet extends HttpServlet {
             session.removeAttribute("authError");
         }
 
+        // The filter normally enforces authentication; retain a controller-level guard as defence in depth.
+        if (session == null || session.getAttribute("userId") == null) {
+            res.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("pageTitle", "Dashboard");
 
